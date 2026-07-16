@@ -1,0 +1,103 @@
+*{
+    margin: 0;
+}
+html{
+    scroll-behavior: smooth;
+}
+body{
+    background-image: url('https://img.magnific.com/vetores-gratis/projeto-de-vetor-de-grade-de-padrao-de-grafico-de-perspectiva-abstrata_1017-45232.jpg?semt=ais_hybrid&w=740&q=80');
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    
+}
+.filho{
+    width: 1270px;
+    height: 50px;
+    background-color: #cec6cf25;
+    border-radius: 18px;
+    border: 2px solid #ffffff3f;
+    opacity: 0.8;
+    display: flex;
+    justify-content: column;
+    align-items: center;
+    align-content: center;
+}
+.entrada{
+    color: rgb(255, 255, 255);
+}
+.novo{
+    color:rgb(40, 216, 107); 
+    width: 100%;
+    max-width: 400px;
+    text-shadow: 0 0 10px rgba(255,255,255,.6);
+    font-family: "Outfit", sans-serif;
+    height: 100%;
+    position: absolute;
+    top: 100px;
+    left:60px;
+    font-size: 50px;
+}
+.atalhos{
+    width:100vh;
+    height:100%;
+    color:#ffffff;
+    position:absolute;
+    top:10px;
+    left:400px;
+}
+.inicio{
+    width: 350px;
+    height: 35px;
+    background-color: #16a8095e;
+    border-radius: 15px;
+    border: 2px solid #ffffff3f;
+    opacity: 0.8;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    position: relative;
+    top:10px;
+    left:0;
+}
+.foto-de-perfil{
+    width: 300px;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 15px;
+
+    box-shadow: 
+    0 0 30px rgba(255,255,255,.15),
+    0 0 80px rgba(255,255,255,.15);
+    
+    position: relative;
+    top: 0px;
+    left:400px;
+    
+}
+
+.bar{
+    width: 100%;
+    height: 100%;
+    color: #979797;  
+    left: 0;
+    top:auto;
+}
+.foto-de-perfil2{
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 2px solid green;
+
+    box-shadow: 
+    0 0 30px rgba(255,255,255,.15),
+    0 0 80px rgba(255,255,255,.15);
+    
+    position: relative;
+    top: 20px;
+    left:400px;
+}
