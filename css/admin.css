@@ -59,7 +59,7 @@
 .admin-stat-label { font-size: 12px; font-weight: 500; color: var(--ink-faint); letter-spacing: 0.04em; }
 .stat-new { border-color: rgba(125, 90, 68, 0.4); }
 .admin-stat.stat-new .admin-stat-value { color: var(--accent-deep); }
-.admin-stat.stat-won .admin-stat-value { color: #3c6e4f; }
+.admin-stat.stat-won .admin-stat-value { color: var(--won, #3c6e4f); }
 
 /* --- Filters --- */
 .admin-filters {
@@ -187,7 +187,7 @@
   border: 1px solid var(--line);
   transition: color 0.2s ease, border-color 0.2s ease;
 }
-.btn-ghost-mini:hover { color: #7c2e25; border-color: rgba(139, 58, 47, 0.4); }
+.btn-ghost-mini:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
 
 /* --- Responsive admin --- */
 @media (max-width: 600px) {

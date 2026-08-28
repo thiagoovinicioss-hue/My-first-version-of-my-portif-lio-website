@@ -24,19 +24,18 @@ export const CONFIG = {
 
   // WhatsApp number used for the quote flow.
   // Format: country code + area code + number, digits only.
-  // TODO: replace with your real number, e.g. '5511999998888'.
   whatsapp: {
-    number: '5500000000000',
+    number: '5544988562515',
   },
 
   // Lead storage backend (Supabase).
-  // Leave url/key empty to run in "frontend-only" mode: the quote flow still
-  // generates the WhatsApp link, but leads are not persisted.
-  // Setup: create a project, run supabase/schema.sql, then paste the project URL
-  // and the public "anon" key below (they are public by design with RLS enabled).
+  // The publishable/anon key below is PUBLIC by design (safe to ship to the
+  // browser) — real protection comes from Row Level Security. The secret key
+  // (sb_secret_*) is NEVER placed here or anywhere in this repository: it lives
+  // only in your local, gitignored .env.local and must never be committed.
   supabase: {
-    url: '',
-    anonKey: '',
+    url: 'https://eimtmksxkojpqjsdiwmn.supabase.co',
+    anonKey: 'sb_publishable_CQjrAVAReTakJU4jMiuR5A_AWmJTqyn',
     leadsTable: 'leads',
   },
 

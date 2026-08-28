@@ -1,5 +1,6 @@
 import { CONFIG } from './config.js';
 import { init as initI18n, setLang, getLang, t } from './i18n/index.js';
+import { initTheme } from './theme.js';
 import { initCarousel } from './carousel.js';
 import { initQuote } from './quote.js';
 import { initAdmin } from './admin.js';
@@ -150,6 +151,7 @@ function boot() {
   document.querySelector('#year').textContent = new Date().getFullYear();
 
   initI18n();
+  initTheme();
   wireSocial();
   initHeader();
   initRouter();

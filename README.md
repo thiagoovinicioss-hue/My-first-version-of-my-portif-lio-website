@@ -61,6 +61,23 @@ All public settings live in **`js/config.js`**:
 > Security (already in `schema.sql`): visitors may only insert, only signed-in
 > users may read/update/delete.
 
+## Security: the secret key stays out of Git
+
+This is a **static site** (no server), so anything the browser must use is
+technically visible in the Network tab. That is why the site only ships the
+**public** publishable / anon key, and all write/read protection comes from
+Supabase Row Level Security.
+
+- The secret key (`sb_secret_*`) is **never** placed in `js/config.js` or any
+  tracked file.
+- It lives only in the local, gitignored **`.env.local`** (which also holds a
+  copy of the URL + public keys for reference).
+- If you ever need the secret key (e.g. server-side scripts, Edge Functions,
+  bulk imports), use it only in backend code you control — never in the browser.
+
+> If `.env.local` already existed with an old value, edit it locally; it is
+> ignored by Git and will not be published.
+
 ## Deploy to GitHub Pages
 
 Push to `main` with Pages enabled (Settings → Pages → source `main`, root).

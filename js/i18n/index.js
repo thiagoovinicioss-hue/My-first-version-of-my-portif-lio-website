@@ -11,10 +11,7 @@ export function detectInitial() {
     if (stored && SUPPORTED_LANGS.includes(stored)) return stored;
   } catch (_) { /* storage unavailable */ }
 
-  const nav = (navigator.language || DEFAULT_LANG).toLowerCase().slice(0, 2);
-  if (nav === 'pt') return 'pt';
-  if (nav === 'es') return 'es';
-  if (nav === 'en') return 'en';
+  // The site always starts in Portuguese (pt) unless the user changed language before.
   return DEFAULT_LANG;
 }
 
@@ -56,6 +53,11 @@ function setLangCommon(lang) {
   document.title = t('meta.title');
   const meta = document.querySelector('meta[name="description"]');
   if (meta) meta.setAttribute('content', t('meta.description'));
+  // Notify dynamic renderers (carousel cards, quote selects/review, admin) so
+  // they translate immediately.
+  listeners.forEach((fn) => {
+    try { fn(lang); } catch (_e) { /* listener error must not break the switch */ }
+  });
 }
 
 export function subscribe(fn) {

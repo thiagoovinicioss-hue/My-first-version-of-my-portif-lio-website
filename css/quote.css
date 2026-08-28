@@ -141,9 +141,9 @@
   min-height: 0;
 }
 .form-error {
-  background: rgba(139, 58, 47, 0.08);
-  border: 1px solid rgba(139, 58, 47, 0.25);
-  color: #7c2e25;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  color: var(--danger);
   border-radius: 10px;
   padding: 12px 16px;
   font-size: 14px;

@@ -57,6 +57,9 @@ export const dictionary = {
     'social.github': 'GitHub',
 
     'loading.text': 'Carregando…',
+    'theme.toggle': 'Alternar modo claro/escuro',
+    'theme.night': 'Modo escuro',
+    'theme.day': 'Modo claro',
 
     'quote.eyebrow': 'ORÇAMENTO',
     'quote.step1': 'Sobre você',
@@ -264,6 +267,9 @@ export const dictionary = {
     'social.github': 'GitHub',
 
     'loading.text': 'Loading…',
+    'theme.toggle': 'Toggle light/dark mode',
+    'theme.night': 'Dark mode',
+    'theme.day': 'Light mode',
 
     'quote.eyebrow': 'QUOTE',
     'quote.step1': 'About you',
@@ -471,6 +477,9 @@ export const dictionary = {
     'social.github': 'GitHub',
 
     'loading.text': 'Cargando…',
+    'theme.toggle': 'Cambiar modo claro/oscuro',
+    'theme.night': 'Modo oscuro',
+    'theme.day': 'Modo claro',
 
     'quote.eyebrow': 'PRESUPUESTO',
     'quote.step1': 'Sobre ti',

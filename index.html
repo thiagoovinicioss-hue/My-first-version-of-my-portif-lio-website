@@ -1,11 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('tv.site.theme');
+        if (t !== 'dark' && t !== 'light') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Thiago Vinícius — Engenheiro de Software</title>
   <meta name="description" content="Engenheiro de software especializado em desenvolvimento web, landing pages de alta conversão, automação e soluções com IA. Veja projetos selecionados e solicite um orçamento.">
-  <meta name="theme-color" content="#4A342A">
+  <meta name="theme-color" content="#F7F8FC">
   <meta name="robots" content="index, follow">
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -45,6 +58,10 @@
       </nav>
 
       <div class="header-actions">
+        <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Alternar modo claro/escuro" title="Modo escuro">
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg>
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 14.2A8.3 8.3 0 0 1 9.8 3.6 8.3 8.3 0 1 0 20.4 14.2Z"/></svg>
+        </button>
         <div class="lang-switch" role="group" aria-label="Seletor de idioma">
           <button type="button" class="lang-btn" data-lang="pt" aria-pressed="true" title="Português (Brasil)">PT</button>
           <button type="button" class="lang-btn" data-lang="en" aria-pressed="false" title="English">EN</button>
