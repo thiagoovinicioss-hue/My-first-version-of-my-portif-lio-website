@@ -492,33 +492,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 
 .about-inner {
-  display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
-  gap: clamp(32px, 6vw, 84px);
-  align-items: center;
-}
-
-.about-photo {
-  position: relative;
-}
-.about-photo::after {
-  content: "";
-  position: absolute;
-  inset: auto -16px -16px auto;
-  width: 62%; height: 70%;
-  background: var(--surface-2);
-  border-radius: var(--radius-lg);
-  z-index: -1;
-}
-.about-photo img {
-  width: 100%;
-  aspect-ratio: 4/5;
-  object-fit: cover;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  max-width: 760px;
+  margin-inline: auto;
+  text-align: center;
 }
 
 .about-text {
+  margin-inline: auto;
   font-size: clamp(15px, 1.6vw, 17px);
   color: var(--ink-soft);
   line-height: 1.75;
@@ -534,6 +514,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   gap: 0 28px;
   border-top: 1px solid var(--line);
   margin-bottom: 30px;
+  text-align: left;
 }
 .about-services li {
   padding: 13px 0;
@@ -811,12 +792,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .hero-visual { margin-top: 8px; }
   .hero-keywords { justify-content: center; }
   .scroll-hint { display: none; }
-
-  .about-inner { grid-template-columns: 1fr; }
-  .about-photo { max-width: 460px; justify-self: center; width: 100%; }
-  .about-copy { text-align: center; }
-  .about-text { margin-inline: auto; }
-  .about-services { text-align: left; }
 
   .contact-grid { grid-template-columns: 1fr; }
   .contact-cta { align-self: stretch; }
