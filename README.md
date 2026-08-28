@@ -52,6 +52,9 @@ All public settings live in **`js/config.js`**:
 
 1. Create a free project at [supabase.com](https://supabase.com).
 2. Open **SQL Editor** and run the contents of `supabase/schema.sql`.
+   - If your `leads` table **already exists** (created earlier with the same
+     columns), run `supabase/policies.sql` instead — it applies exactly the
+     same Row Level Security rules without recreating the table.
 3. In **Authentication → Users**, add your admin user with e-mail + password.
 4. Copy the **Project URL** and the public **anon key** from **Settings → API**
    and paste them into `js/config.js` (`supabase.url` and `supabase.anonKey`).
