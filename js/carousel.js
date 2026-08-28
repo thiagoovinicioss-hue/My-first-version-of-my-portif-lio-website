@@ -79,8 +79,12 @@ export class Carousel {
       if (e.key === 'End') { e.preventDefault(); this.go(PROJECTS.length - 1); }
     });
 
-    // Pointer / touch drag (vertical page scroll stays native via touch-action: pan-y)
+    // Pointer / touch drag (vertical page scroll stays native via touch-action: pan-y).
+    // Pointer capture is only engaged after a real horizontal move — otherwise a
+    // plain tap/click on a card link would be retargeted to the carousel root and
+    // the browser would never open the project URL.
     this.pointerId = null;
+    this.captured = false;
     this.root.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (e.target.closest('.carousel-nav')) return;
@@ -88,22 +92,30 @@ export class Carousel {
       this.startX = e.clientX;
       this.dragDX = 0;
       this.dragging = true;
-      this.root.classList.add('is-dragging');
-      this.root.setPointerCapture(e.pointerId);
     });
 
     this.root.addEventListener('pointermove', (e) => {
       if (!this.dragging || e.pointerId !== this.pointerId) return;
       this.dragDX = e.clientX - this.startX;
+      if (!this.captured && Math.abs(this.dragDX) > 6) {
+        this.captured = true;
+        try { this.root.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+      }
       this.setDrag(this.dragDX);
     });
 
     const endDrag = (e) => {
       if (!this.dragging || (e.pointerId !== undefined && e.pointerId !== this.pointerId)) return;
+      if (this.captured) {
+        try { this.root.releasePointerCapture(this.pointerId); } catch (_) { /* ignore */ }
+      }
       this.dragging = false;
+      this.captured = false;
+      this.pointerId = null;
       this.root.classList.remove('is-dragging');
-      if (this.dragDX > 60) { this.suppressClick = true; this.go(this.index - 1); }
-      else if (this.dragDX < -60) { this.suppressClick = true; this.go(this.index + 1); }
+      const dx = this.dragDX;
+      if (dx > 60) { this.suppressClick = true; this.go(this.index - 1); }
+      else if (dx < -60) { this.suppressClick = true; this.go(this.index + 1); }
       this.setDrag(0);
       this.dragDX = 0;
       window.setTimeout(() => { this.suppressClick = false; }, 250);
