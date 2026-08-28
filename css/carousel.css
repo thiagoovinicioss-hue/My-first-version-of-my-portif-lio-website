@@ -52,7 +52,7 @@
 .card-preview-shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(8, 16, 32, 0.12));
+  background: transparent;
   pointer-events: none;
 }
 .is-active .card-preview:hover img { transform: scale(1.035); }

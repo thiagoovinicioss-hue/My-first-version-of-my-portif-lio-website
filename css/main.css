@@ -31,9 +31,6 @@
   --shadow-soft: 0 18px 50px -28px rgba(46, 91, 230, 0.38);
   --shadow-card: 0 30px 60px -30px rgba(46, 91, 230, 0.48);
 
-  --glow-a: rgba(79, 124, 246, 0.16);
-  --glow-b: rgba(122, 90, 248, 0.13);
-
   --container: 1120px;
   --gutter: clamp(20px, 5vw, 40px);
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -64,9 +61,6 @@
   --shadow-soft: 0 18px 50px -28px rgba(0, 0, 0, 0.6);
   --shadow-card: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
 
-  --glow-a: rgba(110, 155, 255, 0.15);
-  --glow-b: rgba(167, 139, 250, 0.13);
-
   color-scheme: dark;
 }
 
@@ -82,10 +76,6 @@ html {
 
 body {
   background-color: var(--bg);
-  background-image:
-    radial-gradient(52rem 36rem at 88% -8%, var(--glow-a), transparent 62%),
-    radial-gradient(44rem 32rem at -6% 32%, var(--glow-b), transparent 60%);
-  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;
@@ -376,14 +366,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   font-weight: 500;
   color: var(--accent-deep);
 }
-@supports ((background-clip: text) or (-webkit-background-clip: text)) {
-  .hero-title em {
-    background: linear-gradient(90deg, var(--accent-deep), var(--accent-2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-}
 .hero-title span { display: block; }
 
 .hero-sub {
@@ -471,7 +453,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .scroll-hint-line {
   width: 1.5px; height: 44px;
-  background: linear-gradient(180deg, var(--accent), transparent);
+  background: var(--accent);
   display: block;
   animation: scrollDrop 2s var(--ease) infinite;
 }
