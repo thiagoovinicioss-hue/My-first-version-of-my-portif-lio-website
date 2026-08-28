@@ -1,0 +1,261 @@
+import { isBackendConfigured, CONFIG } from './config.js';
+import { t, getLang, subscribe } from './i18n/index.js';
+import { signIn, signOut, getSession, onAuthChange, fetchLeads, updateLeadStatus, deleteLead } from './backend.js';
+import { escapeHtml, showToast, formatDate } from './ui.js';
+
+export class Admin {
+  constructor(root) {
+    this.root = root;
+    this.login = root.querySelector('#adminLogin');
+    this.dashboard = root.querySelector('#adminDashboard');
+    this.notConfigured = root.querySelector('#adminNotConfigured');
+
+    this.loginForm = root.querySelector('#adminLoginForm');
+    this.emailInput = root.querySelector('#adminEmail');
+    this.passwordInput = root.querySelector('#adminPassword');
+    this.loginBtn = root.querySelector('#adminLoginBtn');
+    this.loginError = root.querySelector('#adminLoginError');
+    this.backBtn = root.querySelector('#adminBackBtn');
+
+    this.logoutBtn = root.querySelector('#adminLogout');
+    this.welcome = root.querySelector('#adminWelcome');
+    this.statsEl = root.querySelector('#adminStats');
+    this.filtersEl = root.querySelector('#adminFilters');
+    this.loaderEl = root.querySelector('#adminLoader');
+    this.emptyEl = root.querySelector('#adminEmpty');
+    this.errorEl = root.querySelector('#adminError');
+    this.listEl = root.querySelector('#leadsList');
+
+    this.leads = [];
+    this.filter = 'all';
+    this.loading = false;
+
+    this.bind();
+    onAuthChange((session) => { this.onSession(session); });
+    subscribe(() => { if (!this.root.hidden) this.render(); });
+  }
+
+  bind() {
+    this.loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.doLogin();
+    });
+    this.backBtn.addEventListener('click', () => { location.hash = '#/'; });
+    this.logoutBtn.addEventListener('click', async () => {
+      try { await signOut(); } catch (_) { /* ignore */ }
+      this.onSession(null);
+    });
+  }
+
+  async show() {
+    if (!isBackendConfigured()) {
+      this.setSection(this.notConfigured);
+      return;
+    }
+    const session = await getSession();
+    this.onSession(session);
+  }
+
+  setSection(el) {
+    [this.login, this.dashboard, this.notConfigured].forEach((s) => { s.hidden = s !== el; });
+  }
+
+  onSession(session) {
+    if (session?.user) this.setSection(this.dashboard);
+    else this.setSection(this.login);
+    if (session?.user) {
+      this.loadLeads();
+    }
+  }
+
+  async doLogin() {
+    const email = this.emailInput.value.trim();
+    const password = this.passwordInput.value;
+    let invalid = false;
+    const setErr = (name, msg) => {
+      const el = this.loginForm.querySelector(`[data-error-for="${name}"]`);
+      if (el) { el.textContent = msg; invalid = true; }
+    };
+    const clear = (name) => { const el = this.loginForm.querySelector(`[data-error-for="${name}"]`); if (el) el.textContent = ''; };
+    clear('email'); clear('password'); this.loginError.hidden = true;
+    if (!email) setErr('email', t('quote.error.required'));
+    if (!password) setErr('password', t('quote.error.required'));
+    if (invalid) return;
+
+    this.loginBtn.classList.add('is-loading');
+    this.loginBtn.disabled = true;
+    try {
+      await signIn(email, password);
+    } catch (err) {
+      this.loginError.textContent = /invalid|credentials|log in/i.test(err.message) || /Email/i.test(err.message)
+        ? t('admin.login.error.invalid')
+        : t('admin.login.error.generic');
+      this.loginError.hidden = false;
+    } finally {
+      this.loginBtn.classList.remove('is-loading');
+      this.loginBtn.disabled = false;
+    }
+  }
+
+  async loadLeads() {
+    this.loading = true;
+    this.loaderEl.hidden = false;
+    this.errorEl.hidden = true;
+    try {
+      this.leads = await fetchLeads();
+      await this.render();
+    } catch (err) {
+      console.error('loadLeads failed', err);
+      this.errorEl.textContent = t('admin.error.load');
+      this.errorEl.hidden = false;
+      this.leads = [];
+      this.listEl.innerHTML = '';
+    } finally {
+      this.loading = false;
+      this.loaderEl.hidden = true;
+    }
+  }
+
+  render() {
+    this.welcome.textContent = t('admin.dash.welcome');
+    this.renderStats();
+    this.renderFilters();
+    this.renderList();
+  }
+
+  renderStats() {
+    const counts = {};
+    CONFIG.statuses.forEach((s) => { counts[s] = 0; });
+    this.leads.forEach((l) => { counts[l.status] = (counts[l.status] || 0) + 1; });
+
+    const items = [
+      ['total', t('admin.stats.total'), this.leads.length, ''],
+      ...CONFIG.statuses.map((s) => [s, t(`admin.stats.${s}`), counts[s] || 0, s]),
+    ];
+
+    this.statsEl.innerHTML = items.map(([key, label, value, cls]) => `
+      <div class="admin-stat ${cls ? `stat-${cls}` : ''}">
+        <span class="admin-stat-value">${value}</span>
+        <span class="admin-stat-label">${escapeHtml(label)}</span>
+      </div>
+    `).join('');
+  }
+
+  renderFilters() {
+    const statuses = ['all', ...CONFIG.statuses];
+    const total = this.leads.length;
+    this.filtersEl.innerHTML = statuses.map((s) => {
+      const count = s === 'all' ? total : this.leads.filter((l) => l.status === s).length;
+      const label = s === 'all' ? t('admin.filter.all') : t(`admin.status.${s}`);
+      const cls = this.filter === s ? 'is-active' : '';
+      const aria = this.filter === s ? 'true' : 'false';
+      return `<button type="button" class="admin-filter ${cls}" data-filter="${s}" role="tab" aria-selected="${aria}">
+        ${escapeHtml(label)} <span class="admin-filter-count">${count}</span>
+      </button>`;
+    }).join('');
+
+    this.filtersEl.querySelectorAll('.admin-filter').forEach((btn) => {
+      btn.addEventListener('click', () => { this.filter = btn.dataset.filter; this.renderFilters(); this.renderList(); });
+    });
+  }
+
+  filteredLeads() {
+    if (this.filter === 'all') return this.leads;
+    return this.leads.filter((l) => l.status === this.filter);
+  }
+
+  renderList() {
+    const list = this.filteredLeads();
+    if (!list.length) {
+      this.emptyEl.hidden = false;
+      this.emptyEl.innerHTML = '';
+      this.emptyEl.appendChild(document.createTextNode(t('admin.empty')));
+      this.listEl.innerHTML = '';
+      return;
+    }
+    this.emptyEl.hidden = true;
+    this.listEl.innerHTML = list.map((lead) => this.leadCard(lead)).join('');
+    this.listEl.querySelectorAll('[data-status-select]').forEach((sel) => {
+      sel.addEventListener('change', (e) => this.onStatusChange(sel.dataset.statusSelect, e.target.value, sel));
+    });
+    this.listEl.querySelectorAll('[data-delete]').forEach((btn) => {
+      btn.addEventListener('click', () => this.onDelete(btn.dataset.delete));
+    });
+  }
+
+  leadCard(lead) {
+    const date = formatDate(lead.created_at, getLang());
+    const statusOptions = CONFIG.statuses.map((s) => {
+      const sel = lead.status === s ? ' selected' : '';
+      return `<option value="${s}"${sel}>${escapeHtml(t(`admin.status.${s}`))}</option>`;
+    }).join('');
+
+    const detail = (label, value) => value
+      ? `<div class="lead-detail"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`
+      : '';
+
+    return `
+      <article class="lead-card ${lead.status === 'new' ? 'is-new' : ''}">
+        <div class="lead-head">
+          <div class="lead-id">
+            <h4>${escapeHtml(lead.name)}</h4>
+            <p class="lead-date">${escapeHtml(date)}</p>
+          </div>
+          <label class="lead-status-field">
+            <span class="sr-only">${escapeHtml(t('admin.status.new'))}</span>
+            <select data-status-select="${escapeHtml(lead.id)}">
+              ${statusOptions}
+            </select>
+          </label>
+        </div>
+        <dl class="lead-details">
+          ${detail(t('admin.lead.company'), lead.company_name)}
+          ${detail(t('admin.lead.ctype'), lead.company_type)}
+          ${detail(t('admin.lead.goals'), lead.goals)}
+          ${detail(t('admin.lead.objective'), lead.objective)}
+          ${detail(t('admin.lead.budget'), lead.budget)}
+          ${detail(t('admin.lead.extra'), lead.additional_info || lead.details)}
+        </dl>
+        <div class="lead-actions">
+          <button type="button" class="btn-ghost-mini" data-delete="${escapeHtml(lead.id)}">${escapeHtml(t('admin.lead.delete'))}</button>
+        </div>
+      </article>
+    `;
+  }
+
+  async onStatusChange(id, status, select) {
+    const previous = this.leads.find((l) => l.id === id)?.status;
+    select.disabled = true;
+    try {
+      await updateLeadStatus(id, status);
+      const lead = this.leads.find((l) => l.id === id);
+      if (lead) lead.status = status;
+      this.renderStats();
+      this.renderFilters();
+    } catch (err) {
+      console.error(err);
+      showToast(t('admin.error.update'), { error: true });
+      select.value = previous;
+    } finally {
+      select.disabled = false;
+    }
+  }
+
+  async onDelete(id) {
+    if (!window.confirm(t('admin.delete.confirm'))) return;
+    try {
+      await deleteLead(id);
+      this.leads = this.leads.filter((l) => l.id !== id);
+      this.render();
+    } catch (err) {
+      console.error(err);
+      showToast(t('admin.error.delete'), { error: true });
+    }
+  }
+}
+
+export function initAdmin() {
+  const el = document.querySelector('.admin-view');
+  if (!el) return null;
+  return new Admin(el);
+}

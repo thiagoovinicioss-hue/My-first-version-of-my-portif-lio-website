@@ -1,233 +1,421 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Thiago — 14 y/o student and creator building the future through code, engineering and curiosity.">
-  <meta name="theme-color" content="#0d1218">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Thiago Vinícius — Engenheiro de Software</title>
+  <meta name="description" content="Engenheiro de software especializado em desenvolvimento web, landing pages de alta conversão, automação e soluções com IA. Veja projetos selecionados e solicite um orçamento.">
+  <meta name="theme-color" content="#4A342A">
+  <meta name="robots" content="index, follow">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Thiago Vinícius">
+  <meta property="og:title" content="Thiago Vinícius — Engenheiro de Software">
+  <meta property="og:description" content="Software, automação e produtos digitais. Landing pages de alta conversão, sistemas web e soluções com inteligência artificial.">
+  <meta property="og:image" content="assets/og.webp">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="canonical" href="https://thiagoovinicioss-hue.github.io/My-first-version-of-my-portif-lio-website/">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <title>Thiago · Student & Creator</title>
-</head>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/carousel.css">
+  <link rel="stylesheet" href="css/quote.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
 <body>
 
-  <div class="bg-orbs" aria-hidden="true">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="navbar" id="navbar">
-    <a href="#inicio" class="logo">Thiago<span>.</span></a>
-    <nav class="links" aria-label="Primary">
-      <a href="#inicio" class="nav-link active">Home</a>
-      <a href="#sobre" class="nav-link">About</a>
-      <a href="#projetos" class="nav-link">Projects</a>
-      <a href="#contato" class="nav-link">Contact</a>
-    </nav>
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a href="#/" class="brand"><span data-i18n="brand.first">Thiago</span><span data-i18n="brand.last" class="brand-last">Vinícius</span></a>
+
+      <nav class="main-nav" id="mainNav" aria-label="Navegação principal">
+        <a href="#sobre" data-scroll="sobre" data-i18n="nav.about">Sobre</a>
+        <a href="#projetos" data-scroll="projetos" data-i18n="nav.work">Projetos</a>
+        <a href="#contato" data-scroll="contato" data-i18n="nav.contact">Contato</a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="lang-switch" role="group" aria-label="Seletor de idioma">
+          <button type="button" class="lang-btn" data-lang="pt" aria-pressed="true" title="Português (Brasil)">PT</button>
+          <button type="button" class="lang-btn" data-lang="en" aria-pressed="false" title="English">EN</button>
+          <button type="button" class="lang-btn" data-lang="es" aria-pressed="false" title="Español">ES</button>
+        </div>
+        <a href="#/orcamento" class="btn btn-primary btn-sm header-cta" data-i18n="nav.quote">Orçamento</a>
+        <button type="button" class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="Abrir menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <section id="inicio" class="hero">
-      <div class="hero-text">
-        <span class="badge">
-          <span class="badge-dot"></span>
-          14 y/o · Student &amp; Creator
-        </span>
-        <h1 class="hero-title">
-          Building the future
-          <span>through code, engineering</span>
-          and curiosity.
-        </h1>
-        <p class="hero-sub">This is my corner of the internet — where I learn, build and share everything I'm creating.</p>
-        <div class="hero-buttons">
-          <a href="#sobre" class="btn btn-primary">About me <span class="btn-arrow">→</span></a>
-          <a href="https://www.linkedin.com/in/thiago-vinicius-b-araujo-vinicius-81108b341" target="_blank" rel="noopener" class="btn btn-ghost">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.72C24 .77 23.2 0 22.22 0Z"/></svg>
-            LinkedIn
-          </a>
-          <a href="https://github.com/thiagoovinicioss-hue" target="_blank" rel="noopener" class="btn btn-ghost">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.79 23.38c.6.12.82-.26.82-.57v-2c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.32.47-2.39 1.24-3.23-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.23 0 4.62-2.8 5.63-5.48 5.93.43.37.81 1.1.81 2.22v3.29c0 .31.22.69.83.57A12 12 0 0 0 12 .3Z"/></svg>
-            GitHub
-          </a>
-          <a href="https://www.instagram.com/thiagovinnicius14/" target="_blank" rel="noopener" class="btn btn-ghost">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.9 5.9 0 0 0-2.13 1.38A5.9 5.9 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.8.72 1.48 1.38 2.13a5.9 5.9 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56 1.28.06 1.69.07 4.95.07s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.9 5.9 0 0 0 2.13-1.38 5.9 5.9 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.38-2.13A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84ZM12 16a4 4 0 1 1 4-4 4 4 0 0 1-4 4Zm7.85-10.4a1.44 1.44 0 1 1-1.44-1.44 1.44 1.44 0 0 1 1.44 1.44Z"/></svg>
-            Instagram
-          </a>
-          <a href="https://www.youtube.com/@Thiago_maker" target="_blank" rel="noopener" class="btn btn-ghost">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81ZM9.55 15.57V8.43L15.82 12Z"/></svg>
-            YouTube
-          </a>
+  <main id="conteudo">
+
+    <!-- ============ LANDING ============ -->
+    <div class="view" data-view="home">
+
+      <section class="hero" id="inicio">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow" data-i18n="hero.eyebrow">ENGENHEIRO DE SOFTWARE</p>
+            <h1 class="hero-title">
+              <span data-i18n="hero.line1">Construo software,</span>
+              <em data-i18n="hero.line2">sistemas de IA</em>
+              <span data-i18n="hero.line3">e experiências digitais.</span>
+            </h1>
+            <p class="hero-sub" data-i18n="hero.sub">Transformo ideias em produtos digitais — websites de alta performance, automações e soluções com inteligência artificial que geram resultado real para o seu negócio.</p>
+            <div class="hero-actions">
+              <a href="#projetos" class="btn btn-primary" data-scroll="projetos"><span data-i18n="hero.cta.work">Ver projetos</span></a>
+              <a href="#/orcamento" class="btn btn-outline" data-i18n="hero.cta.quote">Solicitar orçamento</a>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="false">
+            <div class="hero-photo">
+              <div class="hero-photo-tile hero-photo-tile-back"></div>
+              <img src="assets/profile.webp" alt="" width="480" height="600" fetchpriority="high" decoding="async">
+              <div class="hero-photo-frame">
+                <span class="hero-photo-name">Thiago Vinícius</span>
+              </div>
+            </div>
+            <ul class="hero-keywords" aria-hidden="true">
+              <li>Software</li>
+              <li>IA</li>
+              <li>Automação</li>
+              <li>Web</li>
+            </ul>
+          </div>
+        </div>
+        <a href="#sobre" class="scroll-hint" data-scroll="sobre" aria-label="Role para a próxima seção">
+          <span class="scroll-hint-line"></span>
+        </a>
+      </section>
+
+      <section class="section about reveal" id="sobre">
+        <div class="about-inner">
+          <div class="about-photo">
+            <img src="assets/profile.webp" alt="Foto de Thiago Vinícius" width="560" height="700" loading="lazy" decoding="async">
+          </div>
+          <div class="about-copy">
+            <p class="section-eyebrow" data-i18n="about.eyebrow">SOBRE</p>
+            <h2 class="section-title" data-i18n="about.title">Sou sobre software pensando como produto.</h2>
+            <p class="about-text" data-i18n="about.p1">Sou engenheiro de software focado em construir produtos digitais, automação e soluções com inteligência artificial. Trabalho da estratégia à entrega — unindo engenharia sólida, interface bem pensada e performance de verdade para transformar ideias em ferramentas úteis e escaláveis.</p>
+            <p class="about-text" data-i18n="about.p2">De landing pages de alta conversão a sistemas web e agentes de IA, cada projeto é tratado como produto: com foco, clareza e resultado mensurável.</p>
+            <ul class="about-services">
+              <li data-i18n="about.s1">Desenvolvimento de software</li>
+              <li data-i18n="about.s2">IA &amp; agentes de IA</li>
+              <li data-i18n="about.s3">Automação</li>
+              <li data-i18n="about.s4">Landing pages &amp; sites de conversão</li>
+              <li data-i18n="about.s5">Aplicações web</li>
+              <li data-i18n="about.s6">Produtos digitais</li>
+            </ul>
+            <a href="#/orcamento" class="btn btn-primary" data-i18n="about.cta">Vamos conversar</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section projects reveal" id="projetos">
+        <div class="projects-intro">
+          <div class="arrow-down" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16m0 0 6-6m-6 6-6-6"/></svg>
+          </div>
+          <p class="projects-hint" data-i18n="projects.hint">Veja alguns dos meus trabalhos</p>
+        </div>
+
+        <div class="carousel" id="carousel" role="region" aria-roledescription="carrossel" aria-label="Projetos selecionados" tabindex="0">
+          <div class="carousel-track" id="carouselTrack"></div>
+          <button type="button" class="carousel-nav carousel-prev" id="carouselPrev" aria-label="Projeto anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18 9 12l6-6"/></svg>
+          </button>
+          <button type="button" class="carousel-nav carousel-next" id="carouselNext" aria-label="Próximo projeto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <div class="carousel-counter" id="carouselCounter" aria-live="off">01 / 10</div>
+        </div>
+      </section>
+
+      <section class="section contact reveal" id="contato">
+        <div class="contact-inner">
+          <div class="arrow-down" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16m0 0 6-6m-6 6-6-6"/></svg>
+          </div>
+          <h2 class="section-title center" data-i18n="contact.title">Vamos construir algo juntos.</h2>
+          <p class="contact-sub" data-i18n="contact.sub">Me chame para uma conversa — posso ajudar com o seu próximo site, sistema ou automação.</p>
+
+          <div class="contact-grid">
+            <div class="contact-social">
+              <a class="social-link" id="socialLinkedin" href="#" target="_blank" rel="noopener nofollow">
+                <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.72C24 .77 23.2 0 22.22 0Z"/></svg>
+                <span data-i18n="social.linkedin">LinkedIn</span>
+              </a>
+              <a class="social-link" id="socialInstagram" href="#" target="_blank" rel="noopener nofollow">
+                <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.9 5.9 0 0 0-2.13 1.38A5.9 5.9 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.8.72 1.48 1.38 2.13a5.9 5.9 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56 1.28.06 1.69.07 4.95.07s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.9 5.9 0 0 0 2.13-1.38 5.9 5.9 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.38-2.13A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84ZM12 16a4 4 0 1 1 4-4 4 4 0 0 1-4 4Zm7.85-10.4a1.44 1.44 0 1 1-1.44-1.44 1.44 1.44 0 0 1 1.44 1.44Z"/></svg>
+                <span data-i18n="social.instagram">Instagram</span>
+              </a>
+              <a class="social-link" id="socialWhatsapp" href="#" target="_blank" rel="noopener nofollow">
+                <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.1 3.2 5.1 4.49.71.3 1.27.49 1.7.62.72.23 1.37.2 1.88.12.58-.09 1.76-.72 2-1.42.25-.7.25-1.29.18-1.42-.07-.12-.27-.2-.57-.35ZM12.05 21.79h-.03a9.8 9.8 0 0 1-5-1.37l-.36-.21-3.72.97.99-3.62-.23-.37a9.77 9.77 0 0 1-1.5-5.22 9.78 9.78 0 1 1 9.78 9.78Zm8.55-18.33A11.8 11.8 0 0 0 12.04 0 11.85 11.85 0 0 0 .2 17.86L0 24l6.23-1.63a11.78 11.78 0 0 0 5.8 1.5h.01A11.86 11.86 0 0 0 12.03.07l8.57 3.39a11.79 11.79 0 0 0 0 0Z"/></svg>
+                <span data-i18n="social.whatsapp">WhatsApp</span>
+              </a>
+              <a class="social-link" id="socialYoutube" href="#" target="_blank" rel="noopener nofollow">
+                <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81ZM9.55 15.57V8.43L15.82 12Z"/></svg>
+                <span data-i18n="social.youtube">YouTube</span>
+              </a>
+              <a class="social-link" id="socialGithub" href="#" target="_blank" rel="noopener nofollow">
+                <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.79 23.38c.6.12.82-.26.82-.57v-2c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.32.47-2.39 1.24-3.23-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.23 0 4.62-2.8 5.63-5.48 5.93.43.37.81 1.1.81 2.22v3.29c0 .31.22.69.83.57A12 12 0 0 0 12 .3Z"/></svg>
+                <span data-i18n="social.github">GitHub</span>
+              </a>
+            </div>
+
+            <div class="contact-cta">
+              <p class="contact-cta-eyebrow" data-i18n="contact.cta.eyebrow">ORÇAMENTO</p>
+              <h3 data-i18n="contact.cta.title">Precisa de um orçamento?</h3>
+              <p data-i18n="contact.cta.body">Conte o que você precisa em poucos passos e eu respondo com uma proposta clara, sem compromisso.</p>
+              <a href="#/orcamento" class="btn btn-primary btn-lg"><span data-i18n="contact.cta.button">Solicitar orçamento</span><span class="btn-arrow" aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ QUOTE ============ -->
+    <section class="view quote-view" data-view="quote" hidden>
+      <div class="quote-shell" id="quoteShell">
+        <div class="quote-head">
+          <button type="button" class="icon-btn quote-back" id="quoteBack" aria-label="Voltar ao site">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5m0 0 6 6m-6-6 6-6"/></svg>
+          </button>
+          <p class="section-eyebrow" data-i18n="quote.eyebrow">ORÇAMENTO</p>
+        </div>
+
+        <div class="quote-progress" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1">
+          <div class="quote-progress-steps">
+            <span class="quote-step" data-step-label="1"><i>1</i><span data-i18n="quote.step1">Sobre você</span></span>
+            <span class="quote-step" data-step-label="2"><i>2</i><span data-i18n="quote.step2">O projeto</span></span>
+            <span class="quote-step" data-step-label="3"><i>3</i><span data-i18n="quote.step3">Orçamento</span></span>
+            <span class="quote-step" data-step-label="4"><i>4</i><span data-i18n="quote.step4">Revisão</span></span>
+          </div>
+          <span class="quote-progress-bar"><span id="quoteProgressFill"></span></span>
+        </div>
+
+        <form id="quoteForm" novalidate>
+          <div class="quote-step-panel" data-panel="1">
+            <h2 class="quote-title" data-i18n="quote.title1">Prazer. Como devo te chamar?</h2>
+            <p class="quote-desc" data-i18n="quote.desc1">Me conte o básico para eu saber quem está do outro lado.</p>
+
+            <div class="field">
+              <label for="qName" data-i18n="quote.name.label">Seu nome</label>
+              <input type="text" id="qName" name="name" autocomplete="name" required data-i18n-ph="quote.name.ph" placeholder="Como posso te chamar?">
+              <p class="field-error" data-error-for="name" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qCompany" data-i18n="quote.company.label">Nome da empresa <span class="opt">(opcional)</span></label>
+              <input type="text" id="qCompany" name="company" autocomplete="organization" data-i18n-ph="quote.company.ph" placeholder="Sua empresa ou marca">
+              <p class="field-error" data-error-for="company" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qCompanyType" data-i18n="quote.ctype.label">Tipo de negócio</label>
+              <div class="select-wrap">
+                <select id="qCompanyType" name="companyType" required>
+                  <option value="" data-i18n-opt="quote.ctype.default">Selecione…</option>
+                </select>
+              </div>
+              <p class="field-error" data-error-for="companyType" role="alert"></p>
+            </div>
+          </div>
+
+          <div class="quote-step-panel" data-panel="2" hidden>
+            <h2 class="quote-title" data-i18n="quote.title2">O que você precisa construir?</h2>
+            <p class="quote-desc" data-i18n="quote.desc2">Quanto mais contexto, melhor será a proposta.</p>
+
+            <div class="field">
+              <label for="qGoals" data-i18n="quote.goals.label">O que você quer construir?</label>
+              <div class="select-wrap">
+                <select id="qGoals" name="goals" required>
+                  <option value="" data-i18n-opt="quote.goals.default">Selecione…</option>
+                </select>
+              </div>
+              <p class="field-error" data-error-for="goals" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qObjective" data-i18n="quote.objective.label">Qual é o principal objetivo?</label>
+              <div class="select-wrap">
+                <select id="qObjective" name="objective" required>
+                  <option value="" data-i18n-opt="quote.objective.default">Selecione…</option>
+                </select>
+              </div>
+              <p class="field-error" data-error-for="objective" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qDetails" data-i18n="quote.details.label">Conte um pouco mais sobre o projeto <span class="opt">(opcional)</span></label>
+              <textarea id="qDetails" name="details" rows="4" data-i18n-ph="quote.details.ph" placeholder="Ex.: preciso de uma landing page para captar leads, com integração com WhatsApp…"></textarea>
+              <p class="field-error" data-error-for="details" role="alert"></p>
+            </div>
+          </div>
+
+          <div class="quote-step-panel" data-panel="3" hidden>
+            <h2 class="quote-title" data-i18n="quote.title3">Qual a faixa de investimento?</h2>
+            <p class="quote-desc" data-i18n="quote.desc3">Isso me ajuda a saber se o tamanho do projeto cabe no seu momento.</p>
+
+            <div class="field">
+              <label id="qBudgetLabel" data-i18n="quote.budget.label">Orçamento aproximado para este projeto</label>
+              <div class="budget-options">
+                <button type="button" class="budget-option" data-budget="1" data-i18n="quote.budget.o1">Até R$ 1.500</button>
+                <button type="button" class="budget-option" data-budget="2" data-i18n="quote.budget.o2">R$ 1.500 – R$ 3.000</button>
+                <button type="button" class="budget-option" data-budget="3" data-i18n="quote.budget.o3">R$ 3.000 – R$ 6.000</button>
+                <button type="button" class="budget-option" data-budget="4" data-i18n="quote.budget.o4">R$ 6.000 – R$ 12.000</button>
+                <button type="button" class="budget-option" data-budget="5" data-i18n="quote.budget.o5">R$ 12.000 – R$ 25.000</button>
+                <button type="button" class="budget-option" data-budget="6" data-i18n="quote.budget.o6">Acima de R$ 25.000</button>
+                <button type="button" class="budget-option" data-budget="7" data-i18n="quote.budget.o7">Prefiro não informar</button>
+              </div>
+              <input type="hidden" name="budget" value="" aria-labelledby="qBudgetLabel">
+              <p class="field-error" data-error-for="budget" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qExtra" data-i18n="quote.extra.label">Algo mais que deva saber? <span class="opt">(opcional)</span></label>
+              <textarea id="qExtra" name="extra" rows="3" data-i18n-ph="quote.extra.ph" placeholder="Prazos, referências de sites que você gosta, integrações…"></textarea>
+              <p class="field-error" data-error-for="extra" role="alert"></p>
+            </div>
+          </div>
+
+          <div class="quote-step-panel" data-panel="4" hidden>
+            <h2 class="quote-title" data-i18n="quote.title4">Confira antes de enviar</h2>
+            <p class="quote-desc" data-i18n="quote.desc4">Você vai poder revisar e editar qualquer resposta.</p>
+            <dl class="quote-review" id="quoteReview"></dl>
+          </div>
+
+          <div class="quote-actions">
+            <button type="button" class="btn btn-outline quote-prev-btn" id="quotePrev" hidden><span class="btn-arrow back" aria-hidden="true">←</span><span data-i18n="quote.back">Voltar</span></button>
+            <button type="button" class="btn btn-primary quote-next-btn" id="quoteNext" data-i18n="quote.next">Continuar</button>
+            <button type="button" class="btn btn-primary quote-submit-btn" id="quoteSubmit" data-i18n="quote.submit" hidden>Enviar solicitação</button>
+          </div>
+
+          <p class="field-error form-error" id="quoteFormError" role="alert" hidden></p>
+
+          <div class="honeypot" aria-hidden="true">
+            <label for="hpField">Não preencha este campo</label>
+            <input type="text" id="hpField" name="hp" tabindex="-1" autocomplete="off">
+          </div>
+        </form>
+
+        <div class="quote-success" id="quoteSuccess" hidden>
+          <div class="quote-success-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg>
+          </div>
+          <h2 class="quote-title" data-i18n="quote.success.title">Solicitação recebida.</h2>
+          <p class="quote-desc" data-i18n="quote.success.body">Obrigado! Suas respostas foram registradas. Para fecharmos isso direto no WhatsApp, toque no botão abaixo.</p>
+          <div class="quote-success-actions">
+            <a id="quoteWaLink" class="btn btn-primary btn-lg" href="#" target="_blank" rel="noopener">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.1 3.2 5.1 4.49.71.3 1.27.49 1.7.62.72.23 1.37.2 1.88.12.58-.09 1.76-.72 2-1.42.25-.7.25-1.29.18-1.42-.07-.12-.27-.2-.57-.35ZM12.05 21.79h-.03a9.8 9.8 0 0 1-5-1.37l-.36-.21-3.72.97.99-3.62-.23-.37a9.77 9.77 0 0 1-1.5-5.22 9.78 9.78 0 0 1 19.55.26 9.78 9.78 0 0 1-9.7 9.52Z"/></svg>
+              <span data-i18n="quote.success.wa">Abrir WhatsApp</span>
+            </a>
+            <button type="button" class="btn btn-outline" id="quoteDone" data-i18n="quote.success.home">Voltar ao site</button>
+          </div>
+          <p class="quote-success-note" id="quoteSavedNote" hidden data-i18n="quote.success.saved">Seu pedido também foi registrado com segurança.</p>
         </div>
       </div>
-      <div class="hero-photo">
-        <div class="photo-frame">
-          <img src="Minha foto.jpeg" alt="Thiago" class="foto-de-perfil">
-        </div>
-        <span class="photo-badge">Thiago Vinicius</span>
-      </div>
-      <div class="scroll-hint" aria-hidden="true"><span></span></div>
     </section>
 
-    <section id="sobre" class="section reveal">
-      <h2 class="section-title"><span class="section-index">01</span> About me</h2>
-      <div class="glass-card about-card">
-        <p>I'm Thiago, a 14-year-old student and creator passionate about technology. I love building things with code and engineering, learning new skills and turning ideas into real projects. This website is my first 100% non-AI coding project.</p>
-        <div class="about-stats">
-          <div class="stat">
-            <span class="stat-value">20+</span>
-            <span class="stat-label">subject olympics</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">2026</span>
-            <span class="stat-label">competing this year</span>
-          </div>
-        </div>
-        <div class="about-chips">
-          <span class="chip"><span class="chip-dot"></span>Code</span>
-          <span class="chip"><span class="chip-dot"></span>Engineering</span>
-          <span class="chip"><span class="chip-dot"></span>Curiosity</span>
-        </div>
-      </div>
-    </section>
+    <!-- ============ ADMIN ============ -->
+    <section class="view admin-view" data-view="admin" hidden>
+      <div class="admin-shell">
 
-    <section id="projetos" class="section reveal">
-      <h2 class="section-title"><span class="section-index">02</span> Projects</h2>
-      <div class="grid">
-        <div class="card">
-          <div class="card-top">
-            <span class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <path d="M14 2v6h6"/>
-              </svg>
-            </span>
-            <span class="card-number">01</span>
+        <div id="adminLogin" class="admin-card">
+          <div class="admin-brand">
+            <a href="#/" class="brand">Thiago<span>Vinícius</span></a>
+            <p class="section-eyebrow" data-i18n="admin.eyebrow">ÁREA RESTRITA</p>
           </div>
-          <h3>My Portfolio</h3>
-          <p>This website — my first hand-coded project, built with pure HTML and CSS.</p>
-          <div class="tags">
-            <span class="tag">HTML</span>
-            <span class="tag">CSS</span>
-          </div>
+          <h2 class="quote-title" data-i18n="admin.login.title">Acesse o painel de leads</h2>
+          <form id="adminLoginForm" novalidate>
+            <div class="field">
+              <label for="adminEmail" data-i18n="admin.login.email">E-mail</label>
+              <input type="email" id="adminEmail" name="email" autocomplete="email" required data-i18n-ph="admin.login.email.ph" placeholder="seu@email.com">
+              <p class="field-error" data-error-for="email" role="alert"></p>
+            </div>
+            <div class="field">
+              <label for="adminPassword" data-i18n="admin.login.password">Senha</label>
+              <input type="password" id="adminPassword" name="password" autocomplete="current-password" required data-i18n-ph="admin.login.password.ph" placeholder="••••••••">
+              <p class="field-error" data-error-for="password" role="alert"></p>
+            </div>
+            <p class="field-error form-error" id="adminLoginError" role="alert" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="adminLoginBtn"><span data-i18n="admin.login.button">Entrar</span></button>
+            <button type="button" class="link-btn btn-block" id="adminBackBtn" data-i18n="admin.login.back">Voltar ao site</button>
+          </form>
         </div>
-        <div class="card">
-          <div class="card-top">
-            <span class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 20h9"/>
-                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-              </svg>
-            </span>
-            <span class="card-number">02</span>
-          </div>
-          <h3>Coming soon</h3>
-          <p>More projects are on the way. Check back later to see what I've been building.</p>
-          <div class="tags">
-            <span class="tag">WIP</span>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-top">
-            <span class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 2 2 7l10 5 10-5-10-5Z"/>
-                <path d="m2 17 10 5 10-5"/>
-                <path d="m2 12 10 5 10-5"/>
-              </svg>
-            </span>
-            <span class="card-number">03</span>
-          </div>
-          <h3>Coming soon</h3>
-          <p>More projects are on the way. Check back later to see what I've been building.</p>
-          <div class="tags">
-            <span class="tag">WIP</span>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section id="contato" class="section reveal">
-      <h2 class="section-title"><span class="section-index">03</span> Contact</h2>
-      <div class="glass-card contact-card">
-        <div class="contact-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/>
-          </svg>
+        <div id="adminDashboard" class="admin-dashboard" hidden>
+          <header class="admin-topbar">
+            <div>
+              <h2 class="quote-title" data-i18n="admin.dash.title">Leads</h2>
+              <p class="admin-sub" id="adminWelcome"></p>
+            </div>
+            <div class="admin-topbar-actions">
+              <a href="#/" class="link-btn" data-i18n="admin.dash.viewSite">Ver site</a>
+              <button type="button" class="btn btn-outline btn-sm" id="adminLogout" data-i18n="admin.dash.logout">Sair</button>
+            </div>
+          </header>
+
+          <div class="admin-stats" id="adminStats"></div>
+
+          <div class="admin-filters" id="adminFilters" role="tablist" aria-label="Filtrar leads por status"></div>
+
+          <div class="admin-loader" id="adminLoader">
+            <span class="spinner" aria-hidden="true"></span>
+            <span data-i18n="admin.loading">Carregando leads…</span>
+          </div>
+          <div class="admin-empty" id="adminEmpty" hidden></div>
+          <p class="field-error form-error" id="adminError" role="alert" hidden></p>
+
+          <div class="leads-list" id="leadsList"></div>
         </div>
-        <h3>Let's build something</h3>
-        <p>Want to reach me? Say hello on LinkedIn or check out my code on GitHub.</p>
-        <div class="hero-buttons contact-buttons">
-          <a href="https://www.linkedin.com/in/thiago-vinicius-b-araujo-vinicius-81108b341" target="_blank" rel="noopener" class="btn btn-primary">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.72C24 .77 23.2 0 22.22 0Z"/></svg>
-            LinkedIn <span class="btn-arrow">→</span>
-          </a>
-          <a href="https://github.com/thiagoovinicioss-hue" target="_blank" rel="noopener" class="btn btn-ghost">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.79 23.38c.6.12.82-.26.82-.57v-2c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.32.47-2.39 1.24-3.23-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.23 0 4.62-2.8 5.63-5.48 5.93.43.37.81 1.1.81 2.22v3.29c0 .31.22.69.83.57A12 12 0 0 0 12 .3Z"/></svg>
-            GitHub
-          </a>
-          <a href="https://www.instagram.com/thiagovinnicius14/" target="_blank" rel="noopener" class="btn btn-ghost">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.9 5.9 0 0 0-2.13 1.38A5.9 5.9 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.8.72 1.48 1.38 2.13a5.9 5.9 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56 1.28.06 1.69.07 4.95.07s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.9 5.9 0 0 0 2.13-1.38 5.9 5.9 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.38-2.13A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84ZM12 16a4 4 0 1 1 4-4 4 4 0 0 1-4 4Zm7.85-10.4a1.44 1.44 0 1 1-1.44-1.44 1.44 1.44 0 0 1 1.44 1.44Z"/></svg>
-            Instagram
-          </a>
-          <a href="https://www.youtube.com/@Thiago_maker" target="_blank" rel="noopener" class="btn btn-ghost">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81ZM9.55 15.57V8.43L15.82 12Z"/></svg>
-            YouTube
-          </a>
+
+        <div id="adminNotConfigured" class="admin-card" hidden>
+          <h2 class="quote-title" data-i18n="admin.misconfigured.title">Backend ainda não configurado</h2>
+          <p class="quote-desc" data-i18n="admin.misconfigured.body">Para ativar o painel de leads, adicione as credenciais do banco de dados em <code>js/config.js</code> e execute o script de setup. Veja o README para o passo a passo.</p>
+          <a href="#/" class="link-btn" data-i18n="admin.misconfigured.back">Voltar ao site</a>
         </div>
+
       </div>
     </section>
   </main>
 
-  <footer class="footer">
+  <footer class="site-footer">
     <div class="footer-inner">
-      <a href="#inicio" class="logo footer-logo">Thiago<span>.</span></a>
-      <nav class="footer-links" aria-label="Footer">
-        <a href="#inicio">Home</a>
-        <a href="#sobre">About</a>
-        <a href="#projetos">Projects</a>
-        <a href="#contato">Contact</a>
-        <a href="https://github.com/thiagoovinicioss-hue" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.instagram.com/thiagovinnicius14/" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://www.youtube.com/@Thiago_maker" target="_blank" rel="noopener">YouTube</a>
-      </nav>
-      <p>© 2026 Thiago. Built with curiosity.</p>
+      <a href="#/" class="brand brand-footer"><span data-i18n="brand.first">Thiago</span><span data-i18n="brand.last" class="brand-last">Vinícius</span></a>
+      <p class="footer-tagline" data-i18n="footer.tagline">Software · IA · Automação · Produtos digitais</p>
+      <div class="footer-links">
+        <a href="#sobre" data-scroll="sobre" data-i18n="nav.about">Sobre</a>
+        <a href="#projetos" data-scroll="projetos" data-i18n="nav.work">Projetos</a>
+        <a href="#contato" data-scroll="contato" data-i18n="nav.contact">Contato</a>
+        <a href="#/orcamento" data-i18n="nav.quote">Orçamento</a>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© <span id="year">2026</span> Thiago Vinícius.</p>
+        <a href="#/admin" class="admin-entry" data-i18n="footer.admin">Área restrita</a>
+      </div>
     </div>
   </footer>
 
-  <script>
-    const revealObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('revealed');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <div class="loading-screen" id="loadingScreen" hidden>
+    <div class="loading-mark">
+      <span class="loading-dot"></span>
+    </div>
+    <p id="loadingText" data-i18n="loading.text">Carregando…</p>
+  </div>
 
-    document.querySelectorAll('.reveal').forEach(function (el) {
-      revealObserver.observe(el);
-    });
-
-    const linkObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          document.querySelectorAll('.nav-link').forEach(function (link) {
-            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
-          });
-        }
-      });
-    }, { rootMargin: '-45% 0px -45% 0px' });
-
-    ['inicio', 'sobre', 'projetos', 'contato'].forEach(function (id) {
-      var section = document.getElementById(id);
-      if (section) linkObserver.observe(section);
-    });
-  </script>
-
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

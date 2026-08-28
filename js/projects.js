@@ -1,0 +1,136 @@
+// Structured project data.
+// Each project maps to a real, deployed build. Descriptions are intentionally
+// conservative: they describe the site and its purpose, never invented results.
+
+export const PROJECTS = [
+  {
+    slug: 'aura-dental',
+    title: 'Aura Dental',
+    url: 'https://thiagoovinicioss-hue.github.io/aura-dental/',
+    preview: 'assets/previews/aura-dental.webp',
+    category: { pt: 'Clínica odontológica', en: 'Dental clinic', es: 'Clínica dental' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Landing page completa para clínica de odontologia estética: tratamentos, resultados, equipe, depoimentos e agendamento integrado ao WhatsApp.',
+      en: 'Full landing page for an aesthetic dentistry clinic: treatments, results, team, testimonials and WhatsApp booking.',
+      es: 'Landing page completa para una clínica de odontología estética: tratamientos, resultados, equipo, testimonios y reserva por WhatsApp.',
+    },
+  },
+  {
+    slug: 'nova-performance',
+    title: 'NOVA Performance',
+    url: 'https://thiagoovinicioss-hue.github.io/nova-performance-landing/',
+    preview: 'assets/previews/nova-performance.webp',
+    category: { pt: 'Estúdio de treino', en: 'Training studio', es: 'Estudio de entrenamiento' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Landing page de conversão para estúdio de performance: modalidades, estrutura, treinadores, planos e captação para aula experimental gratuita.',
+      en: 'Conversion landing page for a performance studio: modalities, facilities, coaches, plans and free trial-lead capture.',
+      es: 'Landing page de conversión para un estudio de performance: modalidades, instalaciones, entrenadores, planes y captación para la clase gratis.',
+    },
+  },
+  {
+    slug: 'forno27',
+    title: 'Forno 27',
+    url: 'https://thiagoovinicioss-hue.github.io/forno27/',
+    preview: 'assets/previews/forno27.webp',
+    category: { pt: 'Pizzaria artesanal', en: 'Artisanal pizzeria', es: 'Pizzería artesanal' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Site completo para pizzaria artesanal: cardápio, história, processo, galeria, reserva de mesa e pedidos online.',
+      en: 'Complete website for an artisanal pizzeria: menu, story, process, gallery, table reservations and online ordering.',
+      es: 'Sitio web completo para una pizzería artesanal: menú, historia, proceso, galería, reservas y pedidos online.',
+    },
+  },
+  {
+    slug: 'blade-47',
+    title: 'Blade 47',
+    url: 'https://thiagoovinicioss-hue.github.io/blade-47/',
+    preview: 'assets/previews/blade-47.webp',
+    category: { pt: 'Barbearia', en: 'Barbershop', es: 'Barbería' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Site para barbearia de precisão: serviços, preços, equipe, experiência e agendamento online integrado ao WhatsApp.',
+      en: 'Website for a precision barbershop: services, pricing, team, experience and online WhatsApp booking.',
+      es: 'Sitio web para una barbería de precisión: servicios, precios, equipo, experiencia y reserva online por WhatsApp.',
+    },
+  },
+  {
+    slug: 'arq-estate',
+    title: 'Arq Estate',
+    url: 'https://thiagoovinicioss-hue.github.io/arq-estate/',
+    preview: 'assets/previews/arq-estate.webp',
+    category: { pt: 'Imóveis de alto padrão', en: 'Luxury real estate', es: 'Inmobiliaria de lujo' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Website de curadoria para imobiliária de alto padrão: portfólio restrito de arquiteturas, privilégios, depoimentos e captura de contato sigiloso.',
+      en: 'Curated website for a high-end real estate firm: a private portfolio of architect-driven homes, membership privileges, testimonials and discreet lead capture.',
+      es: 'Sitio de curaduría para una inmobiliaria de lujo: portafolio privado de arquitectura, privilegios, testimonios y captura de contacto discreta.',
+    },
+  },
+  {
+    slug: 'nero-detailing',
+    title: 'Nero Detailing',
+    url: 'https://thiagoovinicioss-hue.github.io/nero-detailing/',
+    preview: 'assets/previews/nero-detailing.webp',
+    category: { pt: 'Estética automotiva', en: 'Automotive detailing', es: 'Detailing automotriz' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Landing page premium para estúdio de ceramic coating: serviços, pacotes, antes & depois, processo e formulário de orçamento.',
+      en: 'Premium landing page for a ceramic coating studio: services, packages, before & after, process and quote form.',
+      es: 'Landing page premium para un estudio de ceramic coating: servicios, paquetes, antes y después, proceso y formulario de presupuesto.',
+    },
+  },
+  {
+    slug: 'lucas-vera',
+    title: 'Lucas Vera',
+    url: 'https://thiagoovinicioss-hue.github.io/lucas-vera-portfolio/',
+    preview: 'assets/previews/lucas-vera.webp',
+    category: { pt: 'Portfólio de fotógrafo', en: 'Photographer portfolio', es: 'Portafolio de fotógrafo' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Portfólio editorial para fotógrafo de casamentos, moda e editoriais: galeria, projetos selecionados, processo e contato.',
+      en: 'Editorial portfolio for a wedding, fashion and editorial photographer: gallery, selected stories, process and contact.',
+      es: 'Portafolio editorial para un fotógrafo de bodas, moda y editoriales: galería, proyectos seleccionados, proceso y contacto.',
+    },
+  },
+  {
+    slug: 'north-digital-studio',
+    title: 'North Digital Studio',
+    url: 'https://thiagoovinicioss-hue.github.io/north-digital-studio/',
+    preview: 'assets/previews/north-digital-studio.webp',
+    category: { pt: 'Estúdio digital (conceito)', en: 'Digital studio (concept)', es: 'Estudio digital (concepto)' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Website conceitual de estúdio de desenvolvimento focado em conversão — síntese do meu trabalho com landing pages e sites de alta performance.',
+      en: 'Concept website for a development studio obsessed with conversion — a synthesis of my craft around landing pages and high-performance sites.',
+      es: 'Sitio conceptual de un estudio de desarrollo enfocado en conversión: síntesis de mi trabajo con landing pages y sitios de alto rendimiento.',
+    },
+  },
+  {
+    slug: 'ember-coffee',
+    title: 'Ember Coffee Roasters',
+    url: 'https://thiagoovinicioss-hue.github.io/ember-coffee-roasters/',
+    preview: 'assets/previews/ember-coffee.webp',
+    category: { pt: 'Cafeteria & torrefação', en: 'Coffee roastery & café', es: 'Cafetería & tostaduría' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Site para torrefação e cafeteria de specialty coffee: menu completo, métodos de preparo, história, galeria e localização.',
+      en: 'Website for a specialty coffee roastery and café: full menu, brewing methods, story, gallery and location.',
+      es: 'Sitio web para una tostaduría y cafetería de especialidad: menú completo, métodos de preparación, historia, galería y ubicación.',
+    },
+  },
+  {
+    slug: 'forma-atelier',
+    title: 'FORMA Atelier',
+    url: 'https://thiagoovinicioss-hue.github.io/forma-atelier/',
+    preview: 'assets/previews/forma-atelier.webp',
+    category: { pt: 'Estúdio de arquitetura', en: 'Architecture studio', es: 'Estudio de arquitectura' },
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    description: {
+      pt: 'Portfólio para estúdio de arquitetura residencial de autor: obras selecionadas, filosofia, processo, serviços e contato.',
+      en: 'Portfolio for an author-led residential architecture studio: selected works, philosophy, process, services and contact.',
+      es: 'Portafolio para un estudio de arquitectura residencial de autor: obras seleccionadas, filosofía, proceso, servicios y contacto.',
+    },
+  },
+];

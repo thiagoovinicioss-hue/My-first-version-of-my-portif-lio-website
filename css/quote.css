@@ -1,0 +1,267 @@
+/* ============================================================
+   Quote flow
+   ============================================================ */
+
+.quote-view {
+  width: min(100% - var(--gutter), 720px);
+  margin-inline: auto;
+  padding: clamp(36px, 6vh, 64px) 0 clamp(64px, 8vh, 96px);
+  min-height: calc(100vh - 68px);
+}
+
+.quote-shell { display: flex; flex-direction: column; gap: 30px; }
+
+.quote-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* --- Progress --- */
+.quote-progress { display: flex; flex-direction: column; gap: 12px; }
+.quote-progress-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.quote-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-faint);
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.25s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.quote-step i {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.quote-step span:last-child { white-space: nowrap; }
+.quote-step.is-done { color: var(--accent-deep); }
+.quote-step.is-done i { background: var(--accent-deep); color: var(--bg); border-color: var(--accent-deep); }
+.quote-step.is-current { color: var(--ink); }
+.quote-step.is-current i { background: var(--surface-2); border-color: var(--accent-deep); color: var(--ink); }
+
+.quote-progress-bar {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+.quote-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent-deep);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.45s var(--ease);
+}
+
+/* --- Panels & form --- */
+#quoteForm { display: flex; flex-direction: column; gap: 26px; }
+.quote-step-panel:not([hidden]) { animation: fadeUp 0.4s var(--ease) both; }
+
+.quote-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+  outline: none;
+}
+.quote-desc {
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.field label .opt { font-weight: 400; color: var(--ink-faint); font-size: 13px; }
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 13px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--ink-faint); }
+.field input:hover, .field textarea:hover, .field select:hover { border-color: var(--ink-faint); }
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none;
+  border-color: var(--accent-deep);
+  box-shadow: 0 0 0 3px rgba(125, 90, 68, 0.14);
+}
+.field textarea { resize: vertical; min-height: 96px; }
+
+.field select { appearance: none; }
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: "";
+  position: absolute;
+  right: 18px; top: 50%;
+  width: 8px; height: 8px;
+  border-right: 1.5px solid var(--ink-faint);
+  border-bottom: 1.5px solid var(--ink-faint);
+  transform: rotate(45deg) translateY(-70%);
+  pointer-events: none;
+}
+
+.field-error {
+  font-size: 13px;
+  color: var(--danger, #8b3a2f);
+  margin-top: 6px;
+  min-height: 0;
+}
+.form-error {
+  background: rgba(139, 58, 47, 0.08);
+  border: 1px solid rgba(139, 58, 47, 0.25);
+  color: #7c2e25;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+/* --- Budget options --- */
+.budget-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.budget-option {
+  text-align: left;
+  padding: 15px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s var(--ease);
+}
+.budget-option:hover { border-color: var(--accent-deep); transform: translateY(-1px); }
+.budget-option.is-selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+/* --- Review --- */
+.quote-review {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+.quote-review-row {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 10px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+.quote-review-row:last-child { border-bottom: 0; }
+.quote-review-row:hover { background: var(--sand); }
+.quote-review-row dt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+.quote-review-row dd {
+  font-size: 15px;
+  color: var(--ink);
+  word-break: break-word;
+}
+.quote-review-edit { color: var(--ink-faint); font-size: 14px; }
+
+/* --- Actions --- */
+.quote-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.quote-actions .btn { min-width: 150px; }
+.quote-next-btn { margin-left: auto; }
+.quote-prev-btn[hidden], .quote-next-btn[hidden], .quote-submit-btn[hidden] { display: none; }
+
+/* --- Success --- */
+.quote-success {
+  text-align: center;
+  padding: 20px 0;
+}
+.quote-success-mark {
+  width: 64px; height: 64px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  display: grid; place-items: center;
+}
+.quote-success-mark svg { width: 30px; height: 30px; }
+.quote-success .quote-title { text-align: center; }
+.quote-success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-top: 26px;
+}
+.quote-success-note {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+/* --- Honeypot (hidden from users, bots see it) --- */
+.honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Responsive quote
+   ============================================================ */
+@media (max-width: 560px) {
+  .quote-step span:last-child { display: none; }
+  .quote-step { justify-content: center; }
+  .budget-options { grid-template-columns: 1fr; }
+  .quote-review-row { grid-template-columns: 1fr; gap: 4px; padding: 12px 6px; }
+  .quote-review-edit { display: none; }
+  .quote-actions { flex-direction: column-reverse; }
+  .quote-actions .btn { width: 100%; }
+  .quote-next-btn, .quote-submit-btn { margin-left: 0; }
+}
