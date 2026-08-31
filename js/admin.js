@@ -1,6 +1,6 @@
 import { CONFIG, isAuthConfigured } from './config.js';
 import { t, getLang, subscribe } from './i18n/index.js';
-import { signIn, signOut, getSession, fetchLeads, updateLeadStatus, deleteLead, getMFAStatus, getFactors, challengeMFA, verifyMFA } from './backend.js';
+import { signIn, signOut, getSession, fetchLeads, updateLeadStatus, deleteLead, getMFAStatus, getFactors, challengeMFA, verifyMFA, enrollMFA } from './backend.js';
 import { escapeHtml, showToast, formatDate } from './ui.js';
 
 export class Admin {
@@ -23,6 +23,14 @@ export class Admin {
     this.mfaVerifyBtn = root.querySelector('#mfaVerifyBtn');
     this.mfaError = root.querySelector('#mfaError');
     this.mfaBackBtn = root.querySelector('#mfaBackBtn');
+
+    this.mfaSetupSection = root.querySelector('#mfaSetupSection');
+    this.mfaSetupQr = root.querySelector('#mfaSetupQr');
+    this.mfaSetupSecret = root.querySelector('#mfaSetupSecret');
+    this.mfaSetupCode = root.querySelector('#mfaSetupCode');
+    this.mfaSetupBtn = root.querySelector('#mfaSetupBtn');
+    this.mfaSetupError = root.querySelector('#mfaSetupError');
+    this.mfaSetupBack = root.querySelector('#mfaSetupBack');
 
     this.logoutBtn = root.querySelector('#adminLogout');
     this.welcome = root.querySelector('#adminWelcome');
@@ -59,6 +67,15 @@ export class Admin {
       this.setSection(this.login);
       this.loginError.hidden = true;
     });
+    this.mfaSetupForm = root.querySelector('#mfaSetupForm');
+    this.mfaSetupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.doVerifySetup();
+    });
+    this.mfaSetupBack.addEventListener('click', () => {
+      this.setSection(this.login);
+      this.loginError.hidden = true;
+    });
   }
 
   async show() {
@@ -81,7 +98,7 @@ export class Admin {
   }
 
   setSection(el) {
-    [this.login, this.mfaSection, this.dashboard, this.notConfigured].forEach((s) => { s.hidden = s !== el; });
+    [this.login, this.mfaSection, this.mfaSetupSection, this.dashboard, this.notConfigured].forEach((s) => { s.hidden = s !== el; });
   }
 
   onSession(session) {
@@ -126,6 +143,10 @@ export class Admin {
           this.showMFA();
           return;
         }
+        if (!mfa.mfaEnabled) {
+          this.showMFASetup();
+          return;
+        }
       } catch (_) {
         // If MFA status check fails, try session normally.
       }
@@ -151,6 +172,48 @@ export class Admin {
     this.mfaError.hidden = true;
     this.mfaCodeInput.value = '';
     this.mfaCodeInput.focus();
+  }
+
+  async showMFASetup() {
+    this.setSection(this.mfaSetupSection);
+    this.mfaSetupError.hidden = true;
+    this.mfaSetupCode.value = '';
+    try {
+      const enroll = await enrollMFA();
+      this.pendingFactor = enroll.id;
+      this.mfaSetupSecret.value = enroll.totp?.secret || '';
+      this.mfaSetupQr.src = enroll.totp?.qr_code || '';
+      this.mfaSetupBtn.disabled = false;
+    } catch (err) {
+      this.mfaSetupError.textContent = t('admin.mfa.setup.error');
+      this.mfaSetupError.hidden = false;
+    }
+  }
+
+  async doVerifySetup() {
+    const code = this.mfaSetupCode.value.replace(/\s/g, '');
+    if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+      this.mfaSetupError.textContent = t('admin.mfa.error.invalid');
+      this.mfaSetupError.hidden = false;
+      return;
+    }
+    this.mfaSetupBtn.classList.add('is-loading');
+    this.mfaSetupBtn.disabled = true;
+    try {
+      const challenge = await challengeMFA(this.pendingFactor);
+      await verifyMFA(this.pendingFactor, challenge.id, code);
+      const session = await getSession();
+      if (!session.authenticated) {
+        throw new Error('unauthorized');
+      }
+      this.onSession(session);
+    } catch (err) {
+      this.mfaSetupError.textContent = t('admin.mfa.error.invalid');
+      this.mfaSetupError.hidden = false;
+    } finally {
+      this.mfaSetupBtn.classList.remove('is-loading');
+      this.mfaSetupBtn.disabled = false;
+    }
   }
 
   async doVerifyMFA() {

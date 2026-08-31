@@ -388,6 +388,29 @@
           </form>
         </div>
 
+        <div id="mfaSetupSection" class="admin-card" hidden>
+          <div class="admin-brand">
+            <a href="#/" class="brand">Thiago<span>Vinícius</span></a>
+            <p class="section-eyebrow" data-i18n="admin.eyebrow">ÁREA RESTRITA</p>
+          </div>
+          <h2 class="quote-title" data-i18n="admin.mfa.setup.title">Ative a verificação em duas etapas</h2>
+          <p class="quote-desc" data-i18n="admin.mfa.setup.desc">Escaneie o código com o seu app autenticador e insira o código de 6 dígitos para confirmar.</p>
+          <img id="mfaSetupQr" alt="" width="220" height="220" style="border-radius:12px;margin:16px auto;display:block;">
+          <details>
+            <summary data-i18n="admin.mfa.setup.secret">Não consegue escanear? Use a chave manual</summary>
+            <code id="mfaSetupSecret" style="display:block;word-break:break-all;margin-top:8px;font-size:13px;"></code>
+          </details>
+          <form id="mfaSetupForm" novalidate style="text-align:left;margin-top:16px;">
+            <div class="field">
+              <label for="mfaSetupCode" data-i18n="admin.mfa.code">Código</label>
+              <input type="text" id="mfaSetupCode" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" required placeholder="000000">
+            </div>
+            <p class="field-error form-error" id="mfaSetupError" role="alert" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="mfaSetupBtn"><span data-i18n="admin.mfa.verify">Verificar</span></button>
+            <button type="button" class="link-btn btn-block" id="mfaSetupBack" data-i18n="admin.mfa.back">Voltar ao login</button>
+          </form>
+        </div>
+
         <div id="adminDashboard" class="admin-dashboard" hidden>
           <header class="admin-topbar">
             <div>

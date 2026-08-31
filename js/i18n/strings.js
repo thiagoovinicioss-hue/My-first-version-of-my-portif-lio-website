@@ -222,6 +222,10 @@ export const dictionary = {
     'admin.mfa.verify': 'Verificar',
     'admin.mfa.back': 'Voltar ao login',
     'admin.mfa.error.invalid': 'Código inválido ou expirado. Tente novamente.',
+    'admin.mfa.setup.title': 'Ative a verificação em duas etapas',
+    'admin.mfa.setup.desc': 'Escaneie o código com o seu app autenticador (Google Authenticator, Authy etc.) e insira o código de 6 dígitos para confirmar.',
+    'admin.mfa.setup.secret': 'Não consegue escanear? Use a chave manual',
+    'admin.mfa.setup.error': 'Não foi possível iniciar a configuração. Tente novamente.',
   },
 
   en: {
@@ -441,6 +445,10 @@ export const dictionary = {
     'admin.mfa.verify': 'Verify',
     'admin.mfa.back': 'Back to sign in',
     'admin.mfa.error.invalid': 'Invalid or expired code. Please try again.',
+    'admin.mfa.setup.title': 'Enable two-factor verification',
+    'admin.mfa.setup.desc': 'Scan the code with your authenticator app (Google Authenticator, Authy, etc.) and enter the 6-digit code to confirm.',
+    'admin.mfa.setup.secret': 'Can\'t scan? Use the manual key',
+    'admin.mfa.setup.error': 'Could not start setup. Please try again.',
   },
 
   es: {
@@ -660,5 +668,9 @@ export const dictionary = {
     'admin.mfa.verify': 'Verificar',
     'admin.mfa.back': 'Volver al inicio de sesión',
     'admin.mfa.error.invalid': 'Código inválido o expirado. Inténtalo de nuevo.',
+    'admin.mfa.setup.title': 'Activa la verificación en dos pasos',
+    'admin.mfa.setup.desc': 'Escanea el código con tu app autenticadora (Google Authenticator, Authy, etc.) e ingresa el código de 6 dígitos para confirmar.',
+    'admin.mfa.setup.secret': '¿No puedes escanear? Usa la clave manual',
+    'admin.mfa.setup.error': 'No se pudo iniciar la configuración. Inténtalo de nuevo.',
   },
 };

@@ -168,3 +168,15 @@ export async function verifyMFA(factorId, challengeId, code) {
   if (error) throw error;
   return data;
 }
+
+export async function enrollMFA() {
+  const supabase = await ensureClient();
+  if (!supabase) throw new Error('unavailable');
+  const { data, error } = await supabase.auth.mfa.enroll({
+    factorType: 'totp',
+    issuer: 'Thiago Vinícius Portfolio',
+    friendlyName: 'Admin',
+  });
+  if (error) throw error;
+  return data;
+}
