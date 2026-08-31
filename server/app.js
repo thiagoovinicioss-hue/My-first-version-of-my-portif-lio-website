@@ -32,11 +32,25 @@ export function createApp(overrides = {}) {
   app.use(securityHeaders());
   app.use(corsMiddleware(cfg));
 
+  const requireAuth = makeRequireAdmin(auth, cfg, { enforceAAL: false });
   const requireAdmin = makeRequireAdmin(auth, cfg);
 
   // --- Public ---
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
+  });
+
+  // --- MFA status (uses lighter auth — no AAL enforcement) ---
+  app.get('/api/mfa/status', requireAuth, async (req, res) => {
+    try {
+      const mfaEnabled = await auth.hasMFA(req.user);
+      const aal = req.aal || 'aal1';
+      res.set('Cache-Control', 'no-store');
+      res.json({ mfaEnabled, aal });
+    } catch (err) {
+      console.error('mfa.status failed', err);
+      res.status(500).json({ error: 'internal' });
+    }
   });
 
   // --- Session check (restores the authenticated view after a refresh) ---
@@ -104,7 +118,7 @@ export function createApp(overrides = {}) {
   return { app, auth, store, cfg };
 }
 
-function makeRequireAdmin(auth, cfg) {
+function makeRequireAdmin(auth, cfg, { enforceAAL = true } = {}) {
   return async function requireAdmin(req, res, next) {
     const token = bearerToken(req);
     if (!token) return res.status(401).json({ error: 'unauthorized' });
@@ -123,6 +137,20 @@ function makeRequireAdmin(auth, cfg) {
     // never consulted. Only the configured admin is authorized.
     if (!cfg.adminUserId || user.id !== cfg.adminUserId) {
       return res.status(401).json({ error: 'unauthorized' });
+    }
+
+    // Enforce MFA (AAL2) if the user has TOTP enabled.
+    const aal = auth.getAAL(token);
+    req.aal = aal;
+    if (enforceAAL) {
+      try {
+        const mfaEnabled = await auth.hasMFA(user);
+        if (mfaEnabled && aal !== 'aal2') {
+          return res.status(403).json({ error: 'mfa_required' });
+        }
+      } catch (_) {
+        return res.status(503).json({ error: 'auth_unavailable' });
+      }
     }
 
     req.user = user;

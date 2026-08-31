@@ -252,3 +252,35 @@ describe('CORS', () => {
     });
   });
 });
+
+describe('MFA status endpoint', () => {
+  test('GET /api/mfa/status returns mfaEnabled=false for mock auth', async () => {
+    await withApp(baseOverrides, async ({ baseUrl }) => {
+      const res = await request(baseUrl, '/api/mfa/status', { token: ADMIN_TOKEN });
+      assert.equal(res.status, 200);
+      assert.equal(res.data.mfaEnabled, false);
+      assert.equal(res.data.aal, 'aal2');
+    });
+  });
+
+  test('GET /api/mfa/status requires authentication', async () => {
+    await withApp(baseOverrides, async ({ baseUrl }) => {
+      const res = await request(baseUrl, '/api/mfa/status');
+      assert.equal(res.status, 401);
+    });
+  });
+
+  test('GET /api/mfa/status rejects non-admin users', async () => {
+    await withApp(baseOverrides, async ({ baseUrl }) => {
+      const res = await request(baseUrl, '/api/mfa/status', { token: OTHER_TOKEN });
+      assert.equal(res.status, 401);
+    });
+  });
+
+  test('GET /api/mfa/status response is no-store', async () => {
+    await withApp(baseOverrides, async ({ baseUrl }) => {
+      const res = await request(baseUrl, '/api/mfa/status', { token: ADMIN_TOKEN });
+      assert.match(res.headers.get('cache-control'), /no-store/i);
+    });
+  });
+});

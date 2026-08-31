@@ -194,3 +194,11 @@
   .admin-stats { grid-template-columns: repeat(2, 1fr); }
   .lead-detail { grid-template-columns: 1fr; gap: 2px; }
 }
+
+/* --- MFA --- */
+#mfaSection .field input {
+  text-align: center;
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+  font-family: var(--sans);
+}

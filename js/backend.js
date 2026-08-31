@@ -137,3 +137,34 @@ export async function updateLeadStatus(id, status) {
 export async function deleteLead(id) {
   await api(`/api/leads/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
+
+// ---- MFA (TOTP) ----
+
+export async function getMFAStatus() {
+  const data = await api('/api/mfa/status');
+  return { mfaEnabled: Boolean(data?.mfaEnabled), aal: data?.aal || 'aal1' };
+}
+
+export async function getFactors() {
+  const supabase = await ensureClient();
+  if (!supabase) throw new Error('unavailable');
+  const { data, error } = await supabase.auth.mfa.listFactors();
+  if (error) throw error;
+  return data?.totp || [];
+}
+
+export async function challengeMFA(factorId) {
+  const supabase = await ensureClient();
+  if (!supabase) throw new Error('unavailable');
+  const { data, error } = await supabase.auth.mfa.challenge({ factorId });
+  if (error) throw error;
+  return data;
+}
+
+export async function verifyMFA(factorId, challengeId, code) {
+  const supabase = await ensureClient();
+  if (!supabase) throw new Error('unavailable');
+  const { data, error } = await supabase.auth.mfa.verify({ factorId, challengeId, code });
+  if (error) throw error;
+  return data;
+}

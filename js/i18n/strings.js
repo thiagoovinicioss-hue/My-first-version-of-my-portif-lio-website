@@ -215,6 +215,13 @@ export const dictionary = {
     'admin.misconfigured.title': 'Backend de autenticação ainda não configurado',
     'admin.misconfigured.body': 'Para ativar a área restrita, defina a URL do backend em CONFIG.auth.apiBaseUrl (js/config.js), configure as credenciais do Supabase e crie o usuário admin. Veja o README para o passo a passo. O Supabase Auth é a camada de autenticação e autorização.',
     'admin.misconfigured.back': 'Voltar ao site',
+    'admin.mfa.title': 'Verificação em Duas Etapas',
+    'admin.mfa.desc': 'Abra o app autenticador e insira o código de 6 dígitos.',
+    'admin.mfa.code': 'Código',
+    'admin.mfa.code.ph': '000000',
+    'admin.mfa.verify': 'Verificar',
+    'admin.mfa.back': 'Voltar ao login',
+    'admin.mfa.error.invalid': 'Código inválido ou expirado. Tente novamente.',
   },
 
   en: {
@@ -427,6 +434,13 @@ export const dictionary = {
     'admin.misconfigured.title': 'Authentication backend not configured yet',
     'admin.misconfigured.body': 'To enable the private area, set the backend URL in CONFIG.auth.apiBaseUrl (js/config.js), configure the Supabase credentials and create the admin user. See the README for details. Supabase Auth is the authentication and authorization layer.',
     'admin.misconfigured.back': 'Back to site',
+    'admin.mfa.title': 'Two-Factor Verification',
+    'admin.mfa.desc': 'Open your authenticator app and enter the 6-digit code.',
+    'admin.mfa.code': 'Code',
+    'admin.mfa.code.ph': '000000',
+    'admin.mfa.verify': 'Verify',
+    'admin.mfa.back': 'Back to sign in',
+    'admin.mfa.error.invalid': 'Invalid or expired code. Please try again.',
   },
 
   es: {
@@ -639,5 +653,12 @@ export const dictionary = {
     'admin.misconfigured.title': 'Backend de autenticación aún no configurado',
     'admin.misconfigured.body': 'Para activar el área privada, define la URL del backend en CONFIG.auth.apiBaseUrl (js/config.js), configura las credenciales de Supabase y crea el usuario admin. Consulta el README para el paso a paso. Supabase Auth es la capa de autenticación y autorización.',
     'admin.misconfigured.back': 'Volver al sitio',
+    'admin.mfa.title': 'Verificación en Dos Pasos',
+    'admin.mfa.desc': 'Abre la app autenticadora e ingresa el código de 6 dígitos.',
+    'admin.mfa.code': 'Código',
+    'admin.mfa.code.ph': '000000',
+    'admin.mfa.verify': 'Verificar',
+    'admin.mfa.back': 'Volver al inicio de sesión',
+    'admin.mfa.error.invalid': 'Código inválido o expirado. Inténtalo de nuevo.',
   },
 };

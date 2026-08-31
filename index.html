@@ -369,6 +369,25 @@
           </form>
         </div>
 
+        <div id="mfaSection" class="admin-card" hidden>
+          <div class="admin-brand">
+            <a href="#/" class="brand">Thiago<span>Vinícius</span></a>
+            <p class="section-eyebrow" data-i18n="admin.eyebrow">ÁREA RESTRITA</p>
+          </div>
+          <h2 class="quote-title" data-i18n="admin.mfa.title">Verificação em Duas Etapas</h2>
+          <p class="quote-desc" data-i18n="admin.mfa.desc">Abra o app autenticador e insira o código de 6 dígitos.</p>
+          <form id="mfaForm" novalidate>
+            <div class="field">
+              <label for="mfaCode" data-i18n="admin.mfa.code">Código</label>
+              <input type="text" id="mfaCode" name="mfaCode" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" required data-i18n-ph="admin.mfa.code.ph" placeholder="000000">
+              <p class="field-error" data-error-for="mfaCode" role="alert"></p>
+            </div>
+            <p class="field-error form-error" id="mfaError" role="alert" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="mfaVerifyBtn"><span data-i18n="admin.mfa.verify">Verificar</span></button>
+            <button type="button" class="link-btn btn-block" id="mfaBackBtn" data-i18n="admin.mfa.back">Voltar ao login</button>
+          </form>
+        </div>
+
         <div id="adminDashboard" class="admin-dashboard" hidden>
           <header class="admin-topbar">
             <div>

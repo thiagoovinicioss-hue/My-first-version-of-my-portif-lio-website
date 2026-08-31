@@ -17,6 +17,18 @@ export function createAuthValidator(cfg) {
   return createRealValidator(cfg);
 }
 
+function decodeAAL(token) {
+  if (!token) return 'aal1';
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return 'aal1';
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+    return payload.aal || 'aal1';
+  } catch {
+    return 'aal1';
+  }
+}
+
 function createRealValidator(cfg) {
   const ready = Boolean(cfg.supabase.url && cfg.supabase.serviceRoleKey);
   const db = ready
@@ -48,6 +60,18 @@ function createRealValidator(cfg) {
       }
       return result.data?.user ?? null;
     },
+    async hasMFA(user) {
+      if (!ready) return false;
+      try {
+        const { data, error } = await db.auth.admin.getUser(user.id);
+        if (error) return false;
+        const factors = data?.factors || [];
+        return factors.some((f) => f.factor_type === 'totp' && f.status === 'verified');
+      } catch {
+        return false;
+      }
+    },
+    getAAL: decodeAAL,
   };
 }
 
@@ -65,5 +89,7 @@ function createMockValidator(cfg) {
       }
       return null;
     },
+    async hasMFA() { return false; },
+    getAAL() { return 'aal2'; },
   };
 }

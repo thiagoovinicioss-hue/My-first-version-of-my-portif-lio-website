@@ -1,6 +1,6 @@
 import { CONFIG, isAuthConfigured } from './config.js';
 import { t, getLang, subscribe } from './i18n/index.js';
-import { signIn, signOut, getSession, fetchLeads, updateLeadStatus, deleteLead } from './backend.js';
+import { signIn, signOut, getSession, fetchLeads, updateLeadStatus, deleteLead, getMFAStatus, getFactors, challengeMFA, verifyMFA } from './backend.js';
 import { escapeHtml, showToast, formatDate } from './ui.js';
 
 export class Admin {
@@ -16,6 +16,13 @@ export class Admin {
     this.loginBtn = root.querySelector('#adminLoginBtn');
     this.loginError = root.querySelector('#adminLoginError');
     this.backBtn = root.querySelector('#adminBackBtn');
+
+    this.mfaSection = root.querySelector('#mfaSection');
+    this.mfaForm = root.querySelector('#mfaForm');
+    this.mfaCodeInput = root.querySelector('#mfaCode');
+    this.mfaVerifyBtn = root.querySelector('#mfaVerifyBtn');
+    this.mfaError = root.querySelector('#mfaError');
+    this.mfaBackBtn = root.querySelector('#mfaBackBtn');
 
     this.logoutBtn = root.querySelector('#adminLogout');
     this.welcome = root.querySelector('#adminWelcome');
@@ -44,6 +51,14 @@ export class Admin {
       try { await signOut(); } catch (_) { /* ignore */ }
       this.onSession({ authenticated: false });
     });
+    this.mfaForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.doVerifyMFA();
+    });
+    this.mfaBackBtn.addEventListener('click', () => {
+      this.setSection(this.login);
+      this.loginError.hidden = true;
+    });
   }
 
   async show() {
@@ -66,7 +81,7 @@ export class Admin {
   }
 
   setSection(el) {
-    [this.login, this.dashboard, this.notConfigured].forEach((s) => { s.hidden = s !== el; });
+    [this.login, this.mfaSection, this.dashboard, this.notConfigured].forEach((s) => { s.hidden = s !== el; });
   }
 
   onSession(session) {
@@ -103,9 +118,20 @@ export class Admin {
     this.loginBtn.disabled = true;
     try {
       await signIn(login, password);
+
+      // Check if MFA is required for this user.
+      try {
+        const mfa = await getMFAStatus();
+        if (mfa.mfaEnabled && mfa.aal !== 'aal2') {
+          this.showMFA();
+          return;
+        }
+      } catch (_) {
+        // If MFA status check fails, try session normally.
+      }
+
       const session = await getSession();
       if (!session.authenticated) {
-        // Signed into Supabase ok, but this is not the authorized admin.
         this.loginError.textContent = this.errorMessage('unauthorized');
         this.loginError.hidden = false;
         return;
@@ -117,6 +143,48 @@ export class Admin {
     } finally {
       this.loginBtn.classList.remove('is-loading');
       this.loginBtn.disabled = false;
+    }
+  }
+
+  showMFA() {
+    this.setSection(this.mfaSection);
+    this.mfaError.hidden = true;
+    this.mfaCodeInput.value = '';
+    this.mfaCodeInput.focus();
+  }
+
+  async doVerifyMFA() {
+    const code = this.mfaCodeInput.value.replace(/\s/g, '');
+    this.mfaError.hidden = true;
+    if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+      this.mfaError.textContent = t('admin.mfa.error.invalid');
+      this.mfaError.hidden = false;
+      return;
+    }
+
+    this.mfaVerifyBtn.classList.add('is-loading');
+    this.mfaVerifyBtn.disabled = true;
+    try {
+      const factors = await getFactors();
+      const totp = factors.find((f) => f.factor_type === 'totp' && f.status === 'verified');
+      if (!totp) throw new Error('no_factor');
+
+      const challenge = await challengeMFA(totp.id);
+      await verifyMFA(totp.id, challenge.id, code);
+
+      const session = await getSession();
+      if (!session.authenticated) {
+        this.mfaError.textContent = t('admin.mfa.error.invalid');
+        this.mfaError.hidden = false;
+        return;
+      }
+      this.onSession(session);
+    } catch (err) {
+      this.mfaError.textContent = t('admin.mfa.error.invalid');
+      this.mfaError.hidden = false;
+    } finally {
+      this.mfaVerifyBtn.classList.remove('is-loading');
+      this.mfaVerifyBtn.disabled = false;
     }
   }
 
