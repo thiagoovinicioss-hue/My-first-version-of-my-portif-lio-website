@@ -50,7 +50,7 @@ export const CONFIG = {
   // Leave apiBaseUrl empty to run the site with the private area disabled.
   auth: {
     // e.g. 'https://api.example.com'  (no trailing slash)
-    apiBaseUrl: '',
+    apiBaseUrl: 'https://tv-portfolio-api.onrender.com',
   },
 };
 
