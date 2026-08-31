@@ -7,9 +7,9 @@
 --   - only the PORTFOLIO ADMIN (you, your Supabase Auth user) can
 --     SELECT / UPDATE / DELETE leads through the anon key
 --
--- IMPORTANT: before running, replace "REPLACE_WITH_ADMIN_USER_ID" (below) with
--- the UUID of your admin account (Supabase → Authentication → Users → the
--- account you'll use to sign in to /#/admin). e.g. '11111111-2222-…-5555'.
+-- This file already has the portfolio admin's UUID (below, from Supabase →
+-- Authentication → Users). If you ever change the admin account, replace all
+-- occurrences of that UUID.
 --
 -- The Node backend reads/updates/deletes leads with the SERVICE ROLE key, which
 -- bypasses RLS, so administrative operations keep working regardless of these
@@ -53,22 +53,22 @@ drop policy if exists "Authenticated can read leads" on public.leads;
 drop policy if exists "Admin can read leads" on public.leads;
 create policy "Admin can read leads" on public.leads
   for select to authenticated
-  using (auth.uid() = 'REPLACE_WITH_ADMIN_USER_ID'::uuid);
+  using (auth.uid() = 'e84f0bfa-6755-48bb-a5cd-88f23d5c118f'::uuid);
 
 -- Only the portfolio admin may UPDATE leads with the anon key.
 drop policy if exists "Authenticated can update leads" on public.leads;
 drop policy if exists "Admin can update leads" on public.leads;
 create policy "Admin can update leads" on public.leads
   for update to authenticated
-  using (auth.uid() = 'REPLACE_WITH_ADMIN_USER_ID'::uuid)
-  with check (auth.uid() = 'REPLACE_WITH_ADMIN_USER_ID'::uuid);
+  using (auth.uid() = 'e84f0bfa-6755-48bb-a5cd-88f23d5c118f'::uuid)
+  with check (auth.uid() = 'e84f0bfa-6755-48bb-a5cd-88f23d5c118f'::uuid);
 
 -- Only the portfolio admin may DELETE leads with the anon key.
 drop policy if exists "Authenticated can delete leads" on public.leads;
 drop policy if exists "Admin can delete leads" on public.leads;
 create policy "Admin can delete leads" on public.leads
   for delete to authenticated
-  using (auth.uid() = 'REPLACE_WITH_ADMIN_USER_ID'::uuid);
+  using (auth.uid() = 'e84f0bfa-6755-48bb-a5cd-88f23d5c118f'::uuid);
 
 -- ============================================================
 -- After running this SQL:
