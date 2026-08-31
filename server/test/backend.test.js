@@ -1,17 +1,16 @@
 // Integration tests for the portfolio auth backend.
-// Runs against the real Express app with in-memory WordPress + leads mocks,
-// covering the required unauthenticated / authenticated / authorization /
-// session / logout / fail-closed / CSRF / rate-limit scenarios.
+// Runs against the real Express app with in-memory Supabase auth + leads mocks,
+// covering: public, unauthenticated denial, authentication, AUTHORIZATION (only
+// the configured admin user), fail-closed behaviour, CORS and lead CRUD.
 
-import { test, describe, before, after } from 'node:test';
+import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { createApp } from '../app.js';
 
 const ALLOWED_ORIGIN = 'http://localhost:8080';
+const ADMIN_USER_ID = '11111111-2222-3333-4444-555555555555';
+const ADMIN_TOKEN = 'token-admin';
+const OTHER_TOKEN = 'token-other'; // valid Supabase user, NOT the admin
 
 async function withApp(overrides, fn) {
   const ctx = createApp(overrides);
@@ -28,15 +27,10 @@ async function withApp(overrides, fn) {
   }
 }
 
-function extractToken(setCookie) {
-  const match = /tv_session=([^;]+)/.exec(setCookie || '');
-  return match ? match[1] : null;
-}
-
-async function request(baseUrl, path, { method = 'GET', body, headers = {}, cookie, origin } = {}) {
+async function request(baseUrl, path, { method = 'GET', body, headers = {}, token, origin } = {}) {
   const h = { ...headers };
   if (origin) h.Origin = origin;
-  if (cookie) h.Cookie = `tv_session=${cookie}`;
+  if (token) h.Authorization = `Bearer ${token}`;
   const opts = { method, headers: h };
   if (body !== undefined) {
     h['Content-Type'] = 'application/json';
@@ -45,29 +39,18 @@ async function request(baseUrl, path, { method = 'GET', body, headers = {}, cook
   const res = await fetch(`${baseUrl}${path}`, opts);
   let data = null;
   try { data = await res.json(); } catch (_) { /* no body */ }
-  return { status: res.status, data, setCookie: res.headers.get('set-cookie'), headers: res.headers };
+  return { status: res.status, data, headers: res.headers, allowOrigin: res.headers.get('access-control-allow-origin') };
 }
 
 const baseOverrides = {
   env: 'test',
   frontendOrigins: [ALLOWED_ORIGIN],
-  wpMock: true,
-  wpMockUser: 'th_admin',
-  wpMockPassword: 'correct horse battery staple',
+  adminUserId: ADMIN_USER_ID,
+  mockAdminToken: ADMIN_TOKEN,
+  mockUserToken: OTHER_TOKEN,
   supabaseMock: true,
-  cookieSecure: false, // allow plain-HTTP test transport; HttpOnly flags still asserted
-  sessionTtlMs: 60_000,
-  loginWindowMs: 10_000,
-  loginMaxAttempts: 4,
+  authMock: true,
 };
-
-async function login(baseUrl, login = 'th_admin', password = 'correct horse battery staple') {
-  return request(baseUrl, '/api/login', {
-    method: 'POST',
-    origin: ALLOWED_ORIGIN,
-    body: { login, password },
-  });
-}
 
 describe('public endpoints', () => {
   test('health is reachable without authentication', async () => {
@@ -86,8 +69,8 @@ describe('public endpoints', () => {
   });
 });
 
-describe('unauthenticated access is denied', () => {
-  test('GET /api/session without cookie -> 401', async () => {
+describe('unauthenticated requests are rejected', () => {
+  test('GET /api/session without token -> 401', async () => {
     await withApp(baseOverrides, async ({ baseUrl }) => {
       const res = await request(baseUrl, '/api/session');
       assert.equal(res.status, 401);
@@ -95,131 +78,71 @@ describe('unauthenticated access is denied', () => {
     });
   });
 
-  test('GET /api/leads without cookie -> 401', async () => {
+  test('GET /api/leads without token -> 401', async () => {
     await withApp(baseOverrides, async ({ baseUrl }) => {
       const res = await request(baseUrl, '/api/leads');
       assert.equal(res.status, 401);
     });
   });
 
-  test('PATCH/DELETE /api/leads/:id without session -> 401', async () => {
+  test('PATCH/DELETE /api/leads/:id without token -> 401', async () => {
     await withApp(baseOverrides, async ({ baseUrl }) => {
-      const patch = await request(baseUrl, '/api/leads/abc', { method: 'PATCH', origin: ALLOWED_ORIGIN, body: { status: 'won' } });
+      const patch = await request(baseUrl, '/api/leads/abc', { method: 'PATCH', body: { status: 'won' } });
       assert.equal(patch.status, 401);
-      const del = await request(baseUrl, '/api/leads/abc', { method: 'DELETE', origin: ALLOWED_ORIGIN });
+      const del = await request(baseUrl, '/api/leads/abc', { method: 'DELETE' });
       assert.equal(del.status, 401);
     });
   });
 
-  test('state-changing requests from a foreign origin -> 403 (CSRF)', async () => {
+  test('invalid/garbage token -> 401', async () => {
     await withApp(baseOverrides, async ({ baseUrl }) => {
-      const res = await request(baseUrl, '/api/login', {
-        method: 'POST',
-        origin: 'https://evil.example',
-        body: { login: 'x', password: 'y' },
-      });
-      assert.equal(res.status, 403);
+      const session = await request(baseUrl, '/api/session', { token: 'not-a-valid-token' });
+      assert.equal(session.status, 401);
+      const leads = await request(baseUrl, '/api/leads', { token: 'not-a-valid-token' });
+      assert.equal(leads.status, 401);
     });
   });
 });
 
-describe('login', () => {
-  test('rejects invalid credentials with a generic error', async () => {
+describe('authentication: admin token', () => {
+  test('GET /api/session returns the verified admin identity', async () => {
     await withApp(baseOverrides, async ({ baseUrl }) => {
-      const res = await login(baseUrl, 'th_admin', 'wrong-password');
-      assert.equal(res.status, 401);
-      assert.equal(res.data.error, 'invalid_credentials');
-    });
-  });
-
-  test('rejects unknown users with the exact same generic error', async () => {
-    await withApp(baseOverrides, async ({ baseUrl }) => {
-      const res = await login(baseUrl, 'does-not-exist', 'any-password');
-      assert.equal(res.status, 401);
-      assert.equal(res.data.error, 'invalid_credentials');
-    });
-  });
-
-  test('rejects empty fields -> 400', async () => {
-    await withApp(baseOverrides, async ({ baseUrl }) => {
-      const res = await login(baseUrl, '', '');
-      assert.equal(res.status, 400);
-    });
-  });
-
-  test('issues an HttpOnly session cookie on success', async () => {
-    await withApp(baseOverrides, async ({ baseUrl }) => {
-      const res = await login(baseUrl);
+      const res = await request(baseUrl, '/api/session', { token: ADMIN_TOKEN });
       assert.equal(res.status, 200);
-      assert.ok(res.setCookie, 'expected a Set-Cookie header');
-      assert.match(res.setCookie, /tv_session=[0-9a-f]{64}/);
-      assert.match(res.setCookie, /HttpOnly/i);
+      assert.equal(res.data.authenticated, true);
+      assert.equal(res.data.user.id, ADMIN_USER_ID);
     });
   });
 
-  test('cookie is SameSite-aware and Secure-flagged when configured', async () => {
-    await withApp({ ...baseOverrides, cookieSecure: true }, async ({ baseUrl }) => {
-      const res = await login(baseUrl);
-      assert.match(res.setCookie, /Secure/i);
-      assert.match(res.setCookie, /SameSite=None/i);
-    });
-  });
-
-  test('rate limits repeated attempts -> 429', async () => {
-    await withApp(baseOverrides, async ({ baseUrl }) => {
-      let finalStatus = 0;
-      for (let i = 0; i < 6; i++) {
-        const res = await login(baseUrl, 'th_admin', `guess-${i}`);
-        finalStatus = res.status;
-      }
-      assert.equal(finalStatus, 429);
-      assert.equal((await login(baseUrl)).status, 429);
-    });
-  });
-});
-
-describe('authenticated flow', () => {
-  test('login -> session -> leads -> update -> delete', async () => {
+  test('full lead CRUD flow works for the admin', async () => {
     await withApp(baseOverrides, async ({ baseUrl, store }) => {
       const lead = store.seed({ name: 'Ada Lovelace', status: 'new' });
 
-      const loginRes = await login(baseUrl);
-      assert.equal(loginRes.status, 200);
-      const token = extractToken(loginRes.setCookie);
-      assert.ok(token);
-
-      const session = await request(baseUrl, '/api/session', { cookie: token });
-      assert.equal(session.status, 200);
-      assert.equal(session.data.authenticated, true);
-      assert.equal(session.data.user.id, '1');
-
-      const leads = await request(baseUrl, '/api/leads', { cookie: token });
+      const leads = await request(baseUrl, '/api/leads', { token: ADMIN_TOKEN });
       assert.equal(leads.status, 200);
       assert.equal(leads.data.leads.length, 1);
       assert.equal(leads.data.leads[0].id, lead.id);
       assert.equal(leads.data.leads[0].status, 'new');
 
-      const patch = await request(baseUrl, `/api/leads/${lead.id}`, { method: 'PATCH', origin: ALLOWED_ORIGIN, cookie: token, body: { status: 'won' } });
+      const patch = await request(baseUrl, `/api/leads/${lead.id}`, { method: 'PATCH', token: ADMIN_TOKEN, body: { status: 'won' } });
       assert.equal(patch.status, 200);
 
-      const after = await request(baseUrl, '/api/leads', { cookie: token });
+      const after = await request(baseUrl, '/api/leads', { token: ADMIN_TOKEN });
       assert.equal(after.data.leads[0].status, 'won');
 
-      const del = await request(baseUrl, `/api/leads/${lead.id}`, { method: 'DELETE', origin: ALLOWED_ORIGIN, cookie: token });
+      const del = await request(baseUrl, `/api/leads/${lead.id}`, { method: 'DELETE', token: ADMIN_TOKEN });
       assert.equal(del.status, 200);
 
-      const empty = await request(baseUrl, '/api/leads', { cookie: token });
+      const empty = await request(baseUrl, '/api/leads', { token: ADMIN_TOKEN });
       assert.equal(empty.data.leads.length, 0);
     });
   });
 
   test('private responses are served as no-store', async () => {
     await withApp(baseOverrides, async ({ baseUrl }) => {
-      const loginRes = await login(baseUrl);
-      const token = extractToken(loginRes.setCookie);
-      const session = await request(baseUrl, '/api/session', { cookie: token });
+      const session = await request(baseUrl, '/api/session', { token: ADMIN_TOKEN });
       assert.match(session.headers.get('cache-control'), /no-store/i);
-      const leads = await request(baseUrl, '/api/leads', { cookie: token });
+      const leads = await request(baseUrl, '/api/leads', { token: ADMIN_TOKEN });
       assert.match(leads.headers.get('cache-control'), /no-store/i);
     });
   });
@@ -227,164 +150,105 @@ describe('authenticated flow', () => {
   test('invalid status is rejected -> 400', async () => {
     await withApp(baseOverrides, async ({ baseUrl, store }) => {
       const lead = store.seed({ name: 'X' });
-      const loginRes = await login(baseUrl);
-      const token = extractToken(loginRes.setCookie);
-      const patch = await request(baseUrl, `/api/leads/${lead.id}`, { method: 'PATCH', origin: ALLOWED_ORIGIN, cookie: token, body: { status: 'bogus' } });
+      const patch = await request(baseUrl, `/api/leads/${lead.id}`, { method: 'PATCH', token: ADMIN_TOKEN, body: { status: 'bogus' } });
       assert.equal(patch.status, 400);
     });
   });
+});
 
-  test('logout invalidates the session and cookie', async () => {
+describe('authorization: only the configured admin is allowed', () => {
+  test('a valid non-admin Supabase user is denied everywhere', async () => {
     await withApp(baseOverrides, async ({ baseUrl }) => {
-      const loginRes = await login(baseUrl);
-      const token = extractToken(loginRes.setCookie);
-      assert.ok(token);
-
-      const out = await request(baseUrl, '/api/logout', { method: 'POST', origin: ALLOWED_ORIGIN, cookie: token });
-      assert.equal(out.status, 200);
-
-      const session = await request(baseUrl, '/api/session', { cookie: token });
+      const session = await request(baseUrl, '/api/session', { token: OTHER_TOKEN });
       assert.equal(session.status, 401);
-      const leads = await request(baseUrl, '/api/leads', { cookie: token });
+
+      const leads = await request(baseUrl, '/api/leads', { token: OTHER_TOKEN });
       assert.equal(leads.status, 401);
+
+      const patch = await request(baseUrl, '/api/leads/abc', { method: 'PATCH', token: OTHER_TOKEN, body: { status: 'won' } });
+      assert.equal(patch.status, 401);
+    });
+  });
+
+  test('a client-supplied user id is ignored; identity comes from the token only', async () => {
+    await withApp(baseOverrides, async ({ baseUrl, store }) => {
+      const lead = store.seed({ name: 'Asked by admin' });
+      const res = await request(baseUrl, `/api/leads?userId=${ADMIN_USER_ID}`, { token: ADMIN_TOKEN });
+      assert.equal(res.status, 200);
+      // The result is scoped by the verified admin token, never by params.
+      assert.equal(res.data.leads.length, 1);
+      assert.equal(res.data.leads[0].id, lead.id);
+    });
+  });
+
+  test('a user id in the query/PATCH body cannot escalate a non-admin', async () => {
+    await withApp(baseOverrides, async ({ baseUrl, store }) => {
+      const lead = store.seed({ name: 'X' });
+      const patch = await request(baseUrl, `/api/leads/${lead.id}`, {
+        method: 'PATCH',
+        token: OTHER_TOKEN,
+        body: { status: 'won', userId: ADMIN_USER_ID },
+      });
+      assert.equal(patch.status, 401);
     });
   });
 });
 
-describe('authorization (capability) via session revalidation', () => {
-  test('user losing the capability is logged out on next recheck', async () => {
-    await withApp(baseOverrides, async ({ baseUrl, wp, sessions }) => {
-      const loginRes = await login(baseUrl);
-      const token = extractToken(loginRes.setCookie);
-      assert.ok(token);
-
-      const ok = await request(baseUrl, '/api/session', { cookie: token });
-      assert.equal(ok.status, 200);
-
-      // Instrument: expire revalidation window and revoke the capability.
-      const record = sessions.get(token);
-      record.lastValidatedAt = 0;
-      wp.checkUser = async () => ({ reachable: true, allowed: false });
-
-      const denied = await request(baseUrl, '/api/session', { cookie: token });
-      assert.equal(denied.status, 401);
-      assert.equal(denied.data.error, 'unauthorized');
-
-      const leads = await request(baseUrl, '/api/leads', { cookie: token });
-      assert.equal(leads.status, 401);
-    });
-  });
-
-  test('WordPress unreachable fails closed (503) even with a valid cookie', async () => {
-    await withApp(baseOverrides, async ({ baseUrl, wp, sessions }) => {
-      const loginRes = await login(baseUrl);
-      const token = extractToken(loginRes.setCookie);
-      assert.ok(token);
-      const record = sessions.get(token);
-      record.lastValidatedAt = 0;
-
-      wp.checkUser = async () => ({ reachable: false, allowed: false });
-
-      const session = await request(baseUrl, '/api/session', { cookie: token });
+describe('fail-closed behaviour', () => {
+  test('Supabase Auth unavailable -> 503 even with a plausible token', async () => {
+    await withApp(baseOverrides, async ({ baseUrl, auth }) => {
+      auth.getUser = async () => { throw new Error('supabase down'); };
+      const session = await request(baseUrl, '/api/session', { token: ADMIN_TOKEN });
       assert.equal(session.status, 503);
       assert.equal(session.data.error, 'auth_unavailable');
-
-      const leads = await request(baseUrl, '/api/leads', { cookie: token });
+      const leads = await request(baseUrl, '/api/leads', { token: ADMIN_TOKEN });
       assert.equal(leads.status, 503);
     });
   });
-});
 
-describe('fail-closed without a configured WordPress', () => {
-  test('login returns 503 (auth unavailable) when WordPress is not reachable', async () => {
-    await withApp({ ...baseOverrides, wpMock: false, wpBaseUrl: '', supabaseMock: true }, async ({ baseUrl }) => {
-      const res = await login(baseUrl, 'any', 'any');
-      assert.equal(res.status, 503);
-      assert.equal(res.data.error, 'auth_unavailable');
-    });
-  });
-
-  test('an existing session fails closed when WordPress is gone', async () => {
-    await withApp({ ...baseOverrides, wpMock: false, wpBaseUrl: '', supabaseMock: true }, async ({ baseUrl, sessions }) => {
-      // A session that predates the WordPress outage.
-      const record = sessions.create({ userId: '1', displayName: 'X' });
-      record.lastValidatedAt = 0;
-      const session = await request(baseUrl, '/api/session', { cookie: record.token });
+  test('backend with no Supabase / no ADMIN_USER_ID configured fails closed', async () => {
+    await withApp({ ...baseOverrides, authMock: false, supabaseUrl: '', supabaseServiceRoleKey: '', adminUserId: '' }, async ({ baseUrl }) => {
+      const session = await request(baseUrl, '/api/session', { token: 'anything' });
       assert.equal(session.status, 503);
-      const leads = await request(baseUrl, '/api/leads', { cookie: record.token });
+      assert.equal(session.data.error, 'auth_unavailable');
+      const leads = await request(baseUrl, '/api/leads', { token: 'anything' });
       assert.equal(leads.status, 503);
     });
   });
 });
 
-// --- Real HTTP transport against the dev-only mock WordPress server ---
-
-describe('real WordPress REST client (http transport)', () => {
-  let proc;
-  let mockBase;
-  const dir = mkdtempSync(join(tmpdir(), 'tv-mock-wp-'));
-
-  before(async () => {
-    mockBase = `http://127.0.0.1:${8700 + Math.floor(Math.random() * 500)}`;
-    const port = new URL(mockBase).port;
-    proc = spawn(process.execPath, [join(import.meta.dirname, '../scripts/mock-wp.js'), String(port)], {
-      env: {
-        ...process.env,
-        MOCK_WP_PORT: port,
-        MOCK_WP_CONNECT_USER: 'connect',
-        MOCK_WP_CONNECT_PASS: 'app-pass-123',
-        MOCK_WP_USER: 'pvt_admin',
-        MOCK_WP_PASSWORD: 'super-secret',
-        MOCK_WP_USER_ID: '42',
-      },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    proc.unref();
-    await new Promise((resolve, reject) => {
-      proc.stdout.on('data', (d) => { if (/listening/.test(String(d))) resolve(); });
-      proc.once('exit', () => reject(new Error('mock-wp exited early')));
-      proc.once('error', reject);
-      setTimeout(resolve, 800); // fallback
+describe('CORS', () => {
+  test('allowlisted origin gets CORS headers including Authorization', async () => {
+    await withApp(baseOverrides, async ({ baseUrl }) => {
+      const res = await request(baseUrl, '/api/session', { method: 'OPTIONS', origin: ALLOWED_ORIGIN });
+      assert.equal(res.allowOrigin, ALLOWED_ORIGIN);
+      assert.match(res.headers.get('access-control-allow-headers'), /Authorization/i);
     });
   });
 
-  after(() => {
-    if (proc && !proc.killed) proc.kill('SIGTERM');
-  });
-
-  const realOverrides = () => ({
-    env: 'test',
-    frontendOrigins: [ALLOWED_ORIGIN],
-    wpMock: false,
-    wpBaseUrl: mockBase,
-    wpConnectUser: 'connect',
-    wpConnectAppPassword: 'app-pass-123',
-    supabaseMock: true,
-    cookieSecure: false,
-  });
-
-  test('authenticates through the real HTTP API with connector Basic auth', async () => {
-    await withApp(realOverrides(), async ({ baseUrl }) => {
-      const ok = await login(baseUrl, 'pvt_admin', 'super-secret');
-      assert.equal(ok.status, 200);
-      assert.ok(extractToken(ok.setCookie));
+  test('disallowed origin gets no CORS headers', async () => {
+    await withApp(baseOverrides, async ({ baseUrl }) => {
+      const res = await request(baseUrl, '/api/session', { method: 'OPTIONS', origin: 'https://evil.example' });
+      assert.equal(res.allowOrigin, null);
     });
   });
 
-  test('wrong connector credentials produce a fail-closed 503', async () => {
-    await withApp({ ...realOverrides(), wpConnectAppPassword: 'wrong' }, async ({ baseUrl }) => {
-      const res = await login(baseUrl, 'pvt_admin', 'super-secret');
-      assert.equal(res.status, 503);
+  test('bearer architecture: a valid token is accepted regardless of Origin (no CSRF needed)', async () => {
+    await withApp(baseOverrides, async ({ baseUrl, store }) => {
+      const lead = store.seed({ name: 'X' });
+      const res = await request(baseUrl, `/api/leads/${lead.id}`, {
+        method: 'PATCH', token: ADMIN_TOKEN, origin: 'https://evil.example', body: { status: 'lost' },
+      });
+      // Authorization is carried by the bearer header (never sent by browsers
+      // cross-site automatically), so a foreign Origin alone proves nothing.
+      assert.notEqual(res.status, 401);
     });
   });
 
-  test('check-user revalidation works over the real HTTP API', async () => {
-    await withApp(realOverrides(), async ({ baseUrl, sessions }) => {
-      const record = sessions.create({ userId: '42', displayName: 'X' });
-      record.lastValidatedAt = 0;
-      const session = await request(baseUrl, '/api/session', { cookie: record.token });
-      assert.equal(session.status, 200);
-      assert.equal(session.data.authenticated, true);
+  test('no token from any origin still fails', async () => {
+    await withApp(baseOverrides, async ({ baseUrl }) => {
+      const res = await request(baseUrl, '/api/leads', { origin: ALLOWED_ORIGIN });
+      assert.equal(res.status, 401);
     });
   });
 });

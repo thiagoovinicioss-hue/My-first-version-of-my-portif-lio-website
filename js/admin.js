@@ -77,7 +77,8 @@ export class Admin {
 
   errorMessage(code) {
     switch (code) {
-      case 'unauthorized': return t('admin.login.error.invalid');
+      case 'unauthorized':
+      case 'invalid_credentials': return t('admin.login.error.invalid');
       case 'rate_limited': return t('admin.login.error.rate');
       case 'unavailable': return t('admin.login.error.unavailable');
       default: return t('admin.login.error.generic');
@@ -103,6 +104,12 @@ export class Admin {
     try {
       await signIn(login, password);
       const session = await getSession();
+      if (!session.authenticated) {
+        // Signed into Supabase ok, but this is not the authorized admin.
+        this.loginError.textContent = this.errorMessage('unauthorized');
+        this.loginError.hidden = false;
+        return;
+      }
       this.onSession(session);
     } catch (err) {
       this.loginError.textContent = this.errorMessage(err.message);

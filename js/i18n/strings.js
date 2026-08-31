@@ -172,7 +172,7 @@ export const dictionary = {
 
     'admin.eyebrow': 'ÁREA RESTRITA',
     'admin.login.title': 'Acesse o painel de leads',
-    'admin.login.user': 'Usuário ou e-mail',
+    'admin.login.user': 'E-mail',
     'admin.login.user.ph': 'seu@email.com',
     'admin.login.password': 'Senha',
     'admin.login.password.ph': '••••••••',
@@ -213,7 +213,7 @@ export const dictionary = {
     'admin.status.lost': 'Perdido',
     'admin.delete.confirm': 'Excluir este lead?',
     'admin.misconfigured.title': 'Backend de autenticação ainda não configurado',
-    'admin.misconfigured.body': 'Para ativar a área restrita, defina a URL do backend de autenticação em CONFIG.auth.apiBaseUrl (js/config.js) e implante o serviço descrito no README. WordPress é usado como camada de autenticação e autorização.',
+    'admin.misconfigured.body': 'Para ativar a área restrita, defina a URL do backend em CONFIG.auth.apiBaseUrl (js/config.js), configure as credenciais do Supabase e crie o usuário admin. Veja o README para o passo a passo. O Supabase Auth é a camada de autenticação e autorização.',
     'admin.misconfigured.back': 'Voltar ao site',
   },
 
@@ -384,7 +384,7 @@ export const dictionary = {
 
     'admin.eyebrow': 'PRIVATE AREA',
     'admin.login.title': 'Access the leads dashboard',
-    'admin.login.user': 'Username or email',
+    'admin.login.user': 'Email',
     'admin.login.user.ph': 'you@email.com',
     'admin.login.password': 'Password',
     'admin.login.password.ph': '••••••••',
@@ -425,7 +425,7 @@ export const dictionary = {
     'admin.status.lost': 'Lost',
     'admin.delete.confirm': 'Delete this lead?',
     'admin.misconfigured.title': 'Authentication backend not configured yet',
-    'admin.misconfigured.body': 'To enable the private area, set the authentication backend URL in CONFIG.auth.apiBaseUrl (js/config.js) and deploy the service described in the README. WordPress is used as the authentication and authorization layer.',
+    'admin.misconfigured.body': 'To enable the private area, set the backend URL in CONFIG.auth.apiBaseUrl (js/config.js), configure the Supabase credentials and create the admin user. See the README for details. Supabase Auth is the authentication and authorization layer.',
     'admin.misconfigured.back': 'Back to site',
   },
 
@@ -596,7 +596,7 @@ export const dictionary = {
 
     'admin.eyebrow': 'ÁREA PRIVADA',
     'admin.login.title': 'Accede al panel de leads',
-    'admin.login.user': 'Usuario o correo electrónico',
+    'admin.login.user': 'Correo electrónico',
     'admin.login.user.ph': 'tu@email.com',
     'admin.login.password': 'Contraseña',
     'admin.login.password.ph': '••••••••',
@@ -637,7 +637,7 @@ export const dictionary = {
     'admin.status.lost': 'Perdido',
     'admin.delete.confirm': '¿Eliminar este lead?',
     'admin.misconfigured.title': 'Backend de autenticación aún no configurado',
-    'admin.misconfigured.body': 'Para activar el área privada, define la URL del backend de autenticación en CONFIG.auth.apiBaseUrl (js/config.js) e implementa el servicio descrito en el README. WordPress se usa como capa de autenticación y autorización.',
+    'admin.misconfigured.body': 'Para activar el área privada, define la URL del backend en CONFIG.auth.apiBaseUrl (js/config.js), configura las credenciales de Supabase y crea el usuario admin. Consulta el README para el paso a paso. Supabase Auth es la capa de autenticación y autorización.',
     'admin.misconfigured.back': 'Volver al sitio',
   },
 };

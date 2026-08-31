@@ -1,26 +1,27 @@
 // Express application. Exported as a factory so tests can inject config.
 //
 // Security posture:
-//  - Private endpoints require a server-validated session (HttpOnly cookie).
-//    Whether the user is allowed is re-confirmed against WordPress; if
-//    WordPress is unreachable every protected request FAILS CLOSED (503).
-//  - CORS only for the configured frontend origin(s), never "*".
-//  - State-changing requests must come from an allowlisted Origin (CSRF).
-//  - Login is rate limited; all sensitive responses are no-store.
+//  - Private endpoints require a Supabase Auth access token presented as an
+//    `Authorization: Bearer …` header. The token is validated server-side on
+//    EVERY request (constantly re-checked, never assumed).
+//  - Authorization: only the single configured admin (ADMIN_USER_ID) is
+//    allowed; any other verified user is denied.
+//  - Fail closed: if the token can't be verified (expired/invalid) or Supabase
+//    Auth is unreachable/misconfigured, access is denied (401 / 503) — never
+//    allowed through.
+//  - CORS only for the configured frontend origin(s), never "*". No cookies are
+//    used, so CSRF is handled by the bearer-token model (browsers never attach
+//    the token cross-site automatically).
+//  - All sensitive responses are no-store.
 
 import express from 'express';
-import cookieParser from 'cookie-parser';
-import { rateLimit } from 'express-rate-limit';
 import { loadConfig } from './lib/config.js';
-import { createSessionStore } from './lib/sessions.js';
-import { createWordPressClient } from './lib/wp.js';
+import { createAuthValidator } from './lib/supauth.js';
 import { createLeadsStore, VALID_STATUSES } from './lib/store.js';
 
 export function createApp(overrides = {}) {
   const cfg = loadConfig(overrides);
-
-  const sessions = createSessionStore(cfg.session.ttlMs);
-  const wp = createWordPressClient(cfg);
+  const auth = createAuthValidator(cfg);
   const store = createLeadsStore(cfg);
 
   const app = express();
@@ -28,134 +29,27 @@ export function createApp(overrides = {}) {
   if (cfg.trustProxy) app.set('trust proxy', 1);
 
   app.use(express.json({ limit: '16kb' }));
-  app.use(cookieParser());
-  app.use(securityHeaders(cfg));
+  app.use(securityHeaders());
   app.use(corsMiddleware(cfg));
-  app.use(csrfOriginGuard(cfg));
 
-  // --- Login brute-force protection ---
-  const loginLimiter = rateLimit({
-    windowMs: cfg.login.windowMs,
-    limit: cfg.login.max,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    handler: (_req, res) => res.status(429).json({ error: 'rate_limited' }),
-  });
+  const requireAdmin = makeRequireAdmin(auth, cfg);
 
-  // --- Helpers ---
-  const cookieOptions = () => ({
-    httpOnly: true,
-    secure: cfg.session.secure,
-    sameSite: cfg.session.sameSite,
-    path: '/',
-    domain: cfg.session.domain,
-  });
-
-  function issueCookie(res, token) {
-    res.cookie(cfg.session.cookieName, token, {
-      ...cookieOptions(),
-      maxAge: cfg.session.ttlMs,
-    });
-  }
-
-  function clearCookie(res) {
-    res.clearCookie(cfg.session.cookieName, cookieOptions());
-  }
-
-  const requireSession = makeRequireSession();
-
-  function makeRequireSession() {
-    return async function requireSession(req, res, next) {
-      const token = req.cookies?.[cfg.session.cookieName];
-      const session = token ? sessions.get(token) : null;
-      if (!session) return res.status(401).json({ error: 'unauthorized' });
-
-      const needsRecheck = Date.now() - session.lastValidatedAt >= cfg.wp.recheckMs;
-      if (needsRecheck) {
-        let check;
-        try {
-          check = await wp.checkUser(session.userId);
-        } catch (err) {
-          // Fail closed: cannot confirm authorization -> deny.
-          return res.status(503).json({ error: 'auth_unavailable' });
-        }
-        if (!check.reachable) {
-          // WordPress is unavailable. Never assume authenticity; deny access.
-          return res.status(503).json({ error: 'auth_unavailable' });
-        }
-        if (!check.allowed) {
-          sessions.destroy(token);
-          clearCookie(res);
-          return res.status(401).json({ error: 'unauthorized' });
-        }
-        session.lastValidatedAt = Date.now();
-      }
-
-      req.session = session;
-      next();
-    };
-  }
-
+  // --- Public ---
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
   });
 
-  // --- Login ---
-  app.post('/api/login', loginLimiter, async (req, res) => {
-    const login = String(req.body?.login ?? '').trim();
-    const password = typeof req.body?.password === 'string' ? req.body.password : '';
-    if (!login || !password) return res.status(400).json({ error: 'bad_request' });
-
-    let result;
-    try {
-      result = await wp.authenticate(login, password);
-    } catch (err) {
-      return res.status(503).json({ error: 'auth_unavailable' });
-    }
-
-    if (!result.ok) {
-      if (result.code === 'rate_limited') return res.status(429).json({ error: 'rate_limited' });
-      if (result.code === 'unconfigured' || result.code === 'unreachable' || result.code === 'connector_failed') {
-        // The auth layer itself is unavailable/misconfigured -> fail closed.
-        return res.status(503).json({ error: 'auth_unavailable' });
-      }
-      // Generic on purpose: never reveal which field was wrong.
-      return res.status(401).json({ error: 'invalid_credentials' });
-    }
-
-    const record = sessions.create({
-      userId: result.user.id,
-      displayName: result.user.display_name,
-      email: result.user.email,
-      validatedOnce: true,
-    });
-    record.lastValidatedAt = Date.now(); // credentials were just checked
-
-    issueCookie(res, record.token);
-    res.set('Cache-Control', 'no-store');
-    res.json({ ok: true, user: { id: record.userId, display_name: result.user.display_name } });
-  });
-
-  // --- Logout ---
-  app.post('/api/logout', (req, res) => {
-    const token = req.cookies?.[cfg.session.cookieName];
-    sessions.destroy(token);
-    clearCookie(res);
-    res.set('Cache-Control', 'no-store');
-    res.json({ ok: true });
-  });
-
-  // --- Session check ---
-  app.get('/api/session', requireSession, (req, res) => {
+  // --- Session check (restores the authenticated view after a refresh) ---
+  app.get('/api/session', requireAdmin, (req, res) => {
     res.set('Cache-Control', 'no-store');
     res.json({
       authenticated: true,
-      user: { id: req.session.userId, display_name: req.session.displayName, email: req.session.email },
+      user: { id: req.user.id, email: req.user.email || '' },
     });
   });
 
   // --- Private leads API (server-side authorization on every request) ---
-  app.get('/api/leads', requireSession, async (req, res) => {
+  app.get('/api/leads', requireAdmin, async (req, res) => {
     try {
       const leads = await store.list();
       res.set('Cache-Control', 'no-store');
@@ -166,7 +60,7 @@ export function createApp(overrides = {}) {
     }
   });
 
-  app.patch('/api/leads/:id', requireSession, async (req, res) => {
+  app.patch('/api/leads/:id', requireAdmin, async (req, res) => {
     const id = String(req.params.id ?? '');
     const status = String(req.body?.status ?? '');
     if (!id) return res.status(400).json({ error: 'bad_request' });
@@ -181,7 +75,7 @@ export function createApp(overrides = {}) {
     }
   });
 
-  app.delete('/api/leads/:id', requireSession, async (req, res) => {
+  app.delete('/api/leads/:id', requireAdmin, async (req, res) => {
     const id = String(req.params.id ?? '');
     if (!id) return res.status(400).json({ error: 'bad_request' });
     try {
@@ -207,7 +101,39 @@ export function createApp(overrides = {}) {
     res.status(500).json({ error: 'internal' });
   });
 
-  return { app, wp, store, sessions, cfg };
+  return { app, auth, store, cfg };
+}
+
+function makeRequireAdmin(auth, cfg) {
+  return async function requireAdmin(req, res, next) {
+    const token = bearerToken(req);
+    if (!token) return res.status(401).json({ error: 'unauthorized' });
+
+    let user;
+    try {
+      user = await auth.getUser(token);
+    } catch (_) {
+      // Auth layer unavailable/misconfigured -> fail closed.
+      return res.status(503).json({ error: 'auth_unavailable' });
+    }
+
+    if (!user) return res.status(401).json({ error: 'unauthorized' });
+
+    // The identity comes from the verified token; client-supplied ids are
+    // never consulted. Only the configured admin is authorized.
+    if (!cfg.adminUserId || user.id !== cfg.adminUserId) {
+      return res.status(401).json({ error: 'unauthorized' });
+    }
+
+    req.user = user;
+    next();
+  };
+
+  function bearerToken(req) {
+    const header = req.headers.authorization || '';
+    const match = /^Bearer\s+(.+)$/i.exec(header);
+    return match ? match[1].trim() : null;
+  }
 }
 
 function securityHeaders() {
@@ -230,35 +156,13 @@ function corsMiddleware(cfg) {
     if (origin && cfg.frontendOrigins.includes(origin)) {
       res.set({
         'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Credentials': 'true',
         'Vary': 'Origin',
         'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Accept',
+        'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
       });
     }
     if (req.method === 'OPTIONS') {
       return res.status(204).end();
-    }
-    next();
-  };
-}
-
-function csrfOriginGuard(cfg) {
-  return (req, res, next) => {
-    if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') return next();
-    // State-changing requests must come from an allowlisted origin. Most
-    // non-browser tools send no Origin header and are rejected here unless
-    // they carry the HttpOnly cookie AND an explicit allowlisted Origin.
-    let origin = req.headers.origin;
-    if (!origin && req.headers.referer) {
-      try {
-        origin = new URL(req.headers.referer).origin;
-      } catch (_) {
-        origin = null;
-      }
-    }
-    if (!origin || !cfg.frontendOrigins.includes(origin)) {
-      return res.status(403).json({ error: 'forbidden' });
     }
     next();
   };

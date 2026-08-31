@@ -28,11 +28,12 @@ export const CONFIG = {
     number: '5544988562515',
   },
 
-  // Lead storage backend (Supabase).
+  // Lead storage + authentication backend (Supabase).
   // The publishable/anon key below is PUBLIC by design (safe to ship to the
-  // browser) — real protection comes from Row Level Security. The secret key
-  // (sb_secret_*) is NEVER placed here or anywhere in this repository: it lives
-  // only in your local, gitignored .env.local and must never be committed.
+  // browser). It lets the quote form insert leads under Row Level Security and
+  // lets supabase-js sign in with email/password for the private area. The
+  // SERVICE ROLE key (sb_secret_*) is NEVER placed here or anywhere in this
+  // repository: it lives only in the backend's environment.
   supabase: {
     url: 'https://eimtmksxkojpqjsdiwmn.supabase.co',
     anonKey: 'sb_publishable_CQjrAVAReTakJU4jMiuR5A_AWmJTqyn',
@@ -42,11 +43,11 @@ export const CONFIG = {
   // Lead status values used in the admin panel.
   statuses: ['new', 'contacted', 'negotiation', 'won', 'lost'],
 
-  // Authentication / private-area backend.
-  // This is the ONLY public value the frontend needs for the private area: the
-  // base URL of the small server-side API that authenticates against WordPress
-  // and proxies private data. All credentials/sessions live server-side.
-  // Leave empty to run the site with the private area disabled.
+  // Private-area backend. Authentication happens with Supabase Auth
+  // (email/password) directly from this page; the access token is then sent to
+  // the backend, which verifies it server-side, checks the configured admin
+  // user, and only then proxies private lead data. No token handling here.
+  // Leave apiBaseUrl empty to run the site with the private area disabled.
   auth: {
     // e.g. 'https://api.example.com'  (no trailing slash)
     apiBaseUrl: '',
@@ -63,5 +64,7 @@ export function isBackendConfigured() {
 }
 
 export function isAuthConfigured() {
-  return Boolean(CONFIG.auth.apiBaseUrl);
+  // The private area needs both the Supabase client (sign-in) and the backend
+  // (authorized data/leads gateway).
+  return Boolean(isBackendConfigured() && CONFIG.auth.apiBaseUrl);
 }

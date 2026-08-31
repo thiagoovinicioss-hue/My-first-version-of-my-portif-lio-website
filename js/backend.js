@@ -41,22 +41,33 @@ export async function saveLead(payload) {
   return data;
 }
 
-// ---- Private area (authenticated via the portfolio auth backend) ----
+// ---- Private area (Supabase Auth + backend gateway) ----
 //
-// The browser never talks to WordPress or to the database directly. It calls
-// our server, which validates the WordPress session (HttpOnly cookie),
-// re-checks authorization against WordPress, and only then touches the data.
-// Fail-closed: when the backend or WordPress is unavailable, requests fail
-// instead of silently allowing access.
+// The browser authenticates with Supabase Auth (email/password) and keeps a
+// persisted session for UE. That local state is ONLY for UX: the backend
+// re-validates the access token server-side on EVERY private request and only
+// serves data to the configured admin user. Dropping/expiring the token ends
+// access without any client-side "isAuthenticated" flag.
+//
+// The service-role key never leaves the backend.
+
+async function currentAccessToken() {
+  const supabase = await ensureClient();
+  const { data } = await supabase.auth.getSession();
+  return data?.session?.access_token ?? null;
+}
 
 async function api(path, opts = {}) {
   const { apiBaseUrl } = CONFIG.auth;
   if (!apiBaseUrl) throw new Error('unavailable');
 
-  const options = { ...opts, credentials: 'include' };
-  options.headers = { Accept: 'application/json', ...(opts.headers || {}) };
+  const token = opts.token !== undefined ? opts.token : await currentAccessToken();
+  const headers = { Accept: 'application/json', ...(opts.headers || {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const options = { ...opts, headers };
   if (options.body !== undefined && typeof options.body !== 'string') {
-    options.headers['Content-Type'] = 'application/json';
+    headers['Content-Type'] = 'application/json';
     options.body = JSON.stringify(options.body);
   }
 
@@ -70,22 +81,44 @@ async function api(path, opts = {}) {
   let data = null;
   try { data = await res.json(); } catch (_) { /* ignore */ }
 
-  if (res.status === 429) throw new Error('rate_limited');
   if (res.status === 401 || res.status === 403) throw new Error('unauthorized');
+  if (res.status === 429) throw new Error('rate_limited');
   if (!res.ok) throw new Error(res.status >= 500 ? 'unavailable' : 'request_failed');
   return data;
 }
 
-export async function signIn(login, password) {
-  return api('/api/login', { method: 'POST', body: { login, password } });
+export async function signIn(email, password) {
+  const supabase = await ensureClient();
+  if (!supabase) throw new Error('unavailable');
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    if (/too many|rate limit|429/i.test(String(error.message))) throw new Error('rate_limited');
+    // Generic on purpose — never reveal which credential was wrong.
+    throw new Error('invalid_credentials');
+  }
 }
 
 export async function signOut() {
-  await api('/api/logout', { method: 'POST' });
+  const supabase = await ensureClient();
+  if (!supabase) return;
+  await supabase.auth.signOut();
+  // No backend session to clear: dropping the local token already ends access,
+  // and the backend validates the token on every request anyway.
 }
 
 export async function getSession() {
-  const data = await api('/api/session');
+  const token = await currentAccessToken();
+  if (!token) return { authenticated: false, user: null };
+
+  let data;
+  try {
+    data = await api('/api/session', { token });
+  } catch (err) {
+    // Expired/invalid token or not the admin -> treated as logged out. Only a
+    // real outage propagates (fail-closed, the UI shows an error).
+    if (err.message === 'unauthorized') return { authenticated: false, user: null };
+    throw err;
+  }
   return {
     authenticated: Boolean(data?.authenticated),
     user: data?.user || null,
