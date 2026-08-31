@@ -19,7 +19,7 @@ async function ensureClient() {
   return loadPromise;
 }
 
-// ---- Quote form (public insert) ----
+// ---- Quote form (public insert, direct to Supabase with anon key + RLS) ----
 export async function saveLead(payload) {
   const supabase = await ensureClient();
   if (!supabase) throw new Error('backend not configured');
@@ -41,66 +41,66 @@ export async function saveLead(payload) {
   return data;
 }
 
-// ---- Admin (authenticated access only) ----
-export async function signIn(email, password) {
-  const supabase = await ensureClient();
-  if (!supabase) throw new Error('backend not configured');
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw new Error(error.message);
+// ---- Private area (authenticated via the portfolio auth backend) ----
+//
+// The browser never talks to WordPress or to the database directly. It calls
+// our server, which validates the WordPress session (HttpOnly cookie),
+// re-checks authorization against WordPress, and only then touches the data.
+// Fail-closed: when the backend or WordPress is unavailable, requests fail
+// instead of silently allowing access.
+
+async function api(path, opts = {}) {
+  const { apiBaseUrl } = CONFIG.auth;
+  if (!apiBaseUrl) throw new Error('unavailable');
+
+  const options = { ...opts, credentials: 'include' };
+  options.headers = { Accept: 'application/json', ...(opts.headers || {}) };
+  if (options.body !== undefined && typeof options.body !== 'string') {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(options.body);
+  }
+
+  let res;
+  try {
+    res = await fetch(`${apiBaseUrl}${path}`, options);
+  } catch (_) {
+    throw new Error('unavailable');
+  }
+
+  let data = null;
+  try { data = await res.json(); } catch (_) { /* ignore */ }
+
+  if (res.status === 429) throw new Error('rate_limited');
+  if (res.status === 401 || res.status === 403) throw new Error('unauthorized');
+  if (!res.ok) throw new Error(res.status >= 500 ? 'unavailable' : 'request_failed');
+  return data;
+}
+
+export async function signIn(login, password) {
+  return api('/api/login', { method: 'POST', body: { login, password } });
 }
 
 export async function signOut() {
-  const supabase = await ensureClient();
-  if (!supabase) return;
-  await supabase.auth.signOut();
+  await api('/api/logout', { method: 'POST' });
 }
 
 export async function getSession() {
-  const supabase = await ensureClient();
-  if (!supabase) return null;
-  const { data } = await supabase.auth.getSession();
-  return data?.session || null;
-}
-
-export function onAuthChange(callback) {
-  ensureClient().then((supabase) => {
-    if (!supabase) return;
-    supabase.auth.onAuthStateChange((_event, session) => callback(session));
-  });
-}
-
-async function requireUser() {
-  const supabase = await ensureClient();
-  const session = await getSession();
-  if (!supabase || !session) throw new Error('unauthorized');
-  return supabase;
+  const data = await api('/api/session');
+  return {
+    authenticated: Boolean(data?.authenticated),
+    user: data?.user || null,
+  };
 }
 
 export async function fetchLeads() {
-  const supabase = await requireUser();
-  const { data, error } = await supabase
-    .from(CONFIG.supabase.leadsTable)
-    .select('*')
-    .order('created_at', { ascending: false });
-  if (error) throw new Error(error.message);
-  return data || [];
+  const data = await api('/api/leads');
+  return data?.leads || [];
 }
 
 export async function updateLeadStatus(id, status) {
-  const supabase = await requireUser();
-  if (!CONFIG.statuses.includes(status)) throw new Error('invalid status');
-  const { error } = await supabase
-    .from(CONFIG.supabase.leadsTable)
-    .update({ status })
-    .eq('id', id);
-  if (error) throw new Error(error.message);
+  await api(`/api/leads/${encodeURIComponent(id)}`, { method: 'PATCH', body: { status } });
 }
 
 export async function deleteLead(id) {
-  const supabase = await requireUser();
-  const { error } = await supabase
-    .from(CONFIG.supabase.leadsTable)
-    .delete()
-    .eq('id', id);
-  if (error) throw new Error(error.message);
+  await api(`/api/leads/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }

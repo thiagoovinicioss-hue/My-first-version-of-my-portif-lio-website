@@ -1,6 +1,6 @@
-import { isBackendConfigured, CONFIG } from './config.js';
+import { CONFIG, isAuthConfigured } from './config.js';
 import { t, getLang, subscribe } from './i18n/index.js';
-import { signIn, signOut, getSession, onAuthChange, fetchLeads, updateLeadStatus, deleteLead } from './backend.js';
+import { signIn, signOut, getSession, fetchLeads, updateLeadStatus, deleteLead } from './backend.js';
 import { escapeHtml, showToast, formatDate } from './ui.js';
 
 export class Admin {
@@ -11,7 +11,7 @@ export class Admin {
     this.notConfigured = root.querySelector('#adminNotConfigured');
 
     this.loginForm = root.querySelector('#adminLoginForm');
-    this.emailInput = root.querySelector('#adminEmail');
+    this.userInput = root.querySelector('#adminUser');
     this.passwordInput = root.querySelector('#adminPassword');
     this.loginBtn = root.querySelector('#adminLoginBtn');
     this.loginError = root.querySelector('#adminLoginError');
@@ -31,8 +31,7 @@ export class Admin {
     this.loading = false;
 
     this.bind();
-    onAuthChange((session) => { this.onSession(session); });
-    subscribe(() => { if (!this.root.hidden) this.render(); });
+    subscribe(() => { if (!this.root.hidden && !this.dashboard.hidden) this.render(); });
   }
 
   bind() {
@@ -43,17 +42,27 @@ export class Admin {
     this.backBtn.addEventListener('click', () => { location.hash = '#/'; });
     this.logoutBtn.addEventListener('click', async () => {
       try { await signOut(); } catch (_) { /* ignore */ }
-      this.onSession(null);
+      this.onSession({ authenticated: false });
     });
   }
 
   async show() {
-    if (!isBackendConfigured()) {
+    if (!isAuthConfigured()) {
       this.setSection(this.notConfigured);
       return;
     }
-    const session = await getSession();
-    this.onSession(session);
+    this.setSection(this.login);
+    this.loginError.hidden = true;
+    try {
+      const session = await getSession();
+      this.onSession(session);
+    } catch (err) {
+      // Fail closed: if the auth layer is unavailable we do NOT assume the
+      // visitor is logged in — they only see the login form with an error.
+      this.setSection(this.login);
+      this.loginError.textContent = this.errorMessage(err.message);
+      this.loginError.hidden = false;
+    }
   }
 
   setSection(el) {
@@ -61,15 +70,22 @@ export class Admin {
   }
 
   onSession(session) {
-    if (session?.user) this.setSection(this.dashboard);
-    else this.setSection(this.login);
-    if (session?.user) {
-      this.loadLeads();
+    const authed = Boolean(session?.authenticated);
+    this.setSection(authed ? this.dashboard : this.login);
+    if (authed) this.loadLeads();
+  }
+
+  errorMessage(code) {
+    switch (code) {
+      case 'unauthorized': return t('admin.login.error.invalid');
+      case 'rate_limited': return t('admin.login.error.rate');
+      case 'unavailable': return t('admin.login.error.unavailable');
+      default: return t('admin.login.error.generic');
     }
   }
 
   async doLogin() {
-    const email = this.emailInput.value.trim();
+    const login = this.userInput.value.trim();
     const password = this.passwordInput.value;
     let invalid = false;
     const setErr = (name, msg) => {
@@ -77,19 +93,19 @@ export class Admin {
       if (el) { el.textContent = msg; invalid = true; }
     };
     const clear = (name) => { const el = this.loginForm.querySelector(`[data-error-for="${name}"]`); if (el) el.textContent = ''; };
-    clear('email'); clear('password'); this.loginError.hidden = true;
-    if (!email) setErr('email', t('quote.error.required'));
+    clear('user'); clear('password'); this.loginError.hidden = true;
+    if (!login) setErr('user', t('quote.error.required'));
     if (!password) setErr('password', t('quote.error.required'));
     if (invalid) return;
 
     this.loginBtn.classList.add('is-loading');
     this.loginBtn.disabled = true;
     try {
-      await signIn(email, password);
+      await signIn(login, password);
+      const session = await getSession();
+      this.onSession(session);
     } catch (err) {
-      this.loginError.textContent = /invalid|credentials|log in/i.test(err.message) || /Email/i.test(err.message)
-        ? t('admin.login.error.invalid')
-        : t('admin.login.error.generic');
+      this.loginError.textContent = this.errorMessage(err.message);
       this.loginError.hidden = false;
     } finally {
       this.loginBtn.classList.remove('is-loading');
@@ -106,6 +122,12 @@ export class Admin {
       await this.render();
     } catch (err) {
       console.error('loadLeads failed', err);
+      if (err.message === 'unauthorized') {
+        // Session no longer valid (expired/revoked) -> back to login.
+        this.onSession({ authenticated: false });
+        this.errorEl.hidden = true;
+        return;
+      }
       this.errorEl.textContent = t('admin.error.load');
       this.errorEl.hidden = false;
       this.leads = [];
@@ -234,6 +256,11 @@ export class Admin {
       this.renderFilters();
     } catch (err) {
       console.error(err);
+      if (err.message === 'unauthorized') {
+        this.onSession({ authenticated: false });
+        showToast(t('admin.login.error.invalid'), { error: true });
+        return;
+      }
       showToast(t('admin.error.update'), { error: true });
       select.value = previous;
     } finally {
@@ -249,6 +276,11 @@ export class Admin {
       this.render();
     } catch (err) {
       console.error(err);
+      if (err.message === 'unauthorized') {
+        this.onSession({ authenticated: false });
+        showToast(t('admin.login.error.invalid'), { error: true });
+        return;
+      }
       showToast(t('admin.error.delete'), { error: true });
     }
   }

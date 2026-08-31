@@ -41,6 +41,16 @@ export const CONFIG = {
 
   // Lead status values used in the admin panel.
   statuses: ['new', 'contacted', 'negotiation', 'won', 'lost'],
+
+  // Authentication / private-area backend.
+  // This is the ONLY public value the frontend needs for the private area: the
+  // base URL of the small server-side API that authenticates against WordPress
+  // and proxies private data. All credentials/sessions live server-side.
+  // Leave empty to run the site with the private area disabled.
+  auth: {
+    // e.g. 'https://api.example.com'  (no trailing slash)
+    apiBaseUrl: '',
+  },
 };
 
 export function whatsappUrl(message) {
@@ -50,4 +60,8 @@ export function whatsappUrl(message) {
 
 export function isBackendConfigured() {
   return Boolean(CONFIG.supabase.url && CONFIG.supabase.anonKey);
+}
+
+export function isAuthConfigured() {
+  return Boolean(CONFIG.auth.apiBaseUrl);
 }
