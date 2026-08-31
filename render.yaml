@@ -1,0 +1,43 @@
+# Render blueprint for the portfolio backend (free tier web service).
+# Deploy in one click: render.com -> New -> Blueprint -> this repository.
+# It builds ./server and injects the environment below. Only the service-role
+# key is manually entered (it is a secret and is never stored in this repo).
+
+services:
+  - type: web
+    name: tv-portfolio-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      # Injected by Render automatically (the app listens on it).
+      - key: PORT
+        sync: false
+
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+
+      # The only origins allowed to call the API (never "*").
+      - key: FRONTEND_ORIGINS
+        value: https://thiagoovinicioss-hue.github.io
+
+      # Public project config.
+      - key: SUPABASE_URL
+        value: https://eimtmksxkojpqjsdiwmn.supabase.co
+      - key: SUPABASE_LEADS_TABLE
+        value: leads
+
+      # Sole authorized admin (from Supabase -> Authentication -> Users).
+      - key: ADMIN_USER_ID
+        value: e84f0bfa-6755-48bb-a5cd-88f23d5c118f
+
+      # SECRET — set this manually in the Render dashboard (Settings -> Env).
+      # Value: your `sb_secret_…` from Settings/API (the service-role key) or
+      # from .env.local / server/.env.
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
