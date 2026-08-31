@@ -1,6 +1,6 @@
 import { CONFIG, isAuthConfigured } from './config.js';
 import { t, getLang, subscribe } from './i18n/index.js';
-import { signIn, signOut, getSession, fetchLeads, updateLeadStatus, deleteLead, getMFAStatus, getFactors, challengeMFA, verifyMFA, enrollMFA } from './backend.js';
+import { signIn, signOut, getSession, fetchLeads, updateLeadStatus, deleteLead, getMFAStatus, getFactors, challengeMFA, verifyMFA, enrollMFA, unEnrollMFA } from './backend.js';
 import { escapeHtml, showToast, formatDate } from './ui.js';
 
 export class Admin {
@@ -136,29 +136,22 @@ export class Admin {
     try {
       await signIn(login, password);
 
-      // Check if MFA is required for this user.
-      try {
-        const mfa = await getMFAStatus();
-        if (mfa.mfaEnabled && mfa.aal !== 'aal2') {
-          this.showMFA();
-          return;
-        }
-        if (!mfa.mfaEnabled) {
-          this.showMFASetup();
-          return;
-        }
-      } catch (_) {
-        // If MFA status check fails, try session normally.
-      }
-
       const session = await getSession();
       if (!session.authenticated) {
-        this.loginError.textContent = this.errorMessage('unauthorized');
-        this.loginError.hidden = false;
+        // Not seen by the backend as the authorized admin at AAL2. This means
+        // the admin either has no MFA and can set it up, or has MFA and must
+        // complete the challenge. Route accordingly.
+        const mfa = await getMFAStatus();
+        if (mfa.mfaEnabled) {
+          this.showMFA();
+        } else {
+          this.showMFASetup();
+        }
         return;
       }
       this.onSession(session);
     } catch (err) {
+      console.error('doLogin error:', err);
       this.loginError.textContent = this.errorMessage(err.message);
       this.loginError.hidden = false;
     } finally {
@@ -178,13 +171,24 @@ export class Admin {
     this.setSection(this.mfaSetupSection);
     this.mfaSetupError.hidden = true;
     this.mfaSetupCode.value = '';
+    this.mfaSetupBtn.disabled = true;
     try {
+      // Clean up any half-set-up (unverified) factors first, so a fresh QR
+      // code is always generated.
+      const existing = await getFactors();
+      for (const f of existing) {
+        if (f.factor_type === 'totp' && f.status !== 'verified') {
+          try { await unEnrollMFA(f.id); } catch (_) { /* best effort */ }
+        }
+      }
+
       const enroll = await enrollMFA();
       this.pendingFactor = enroll.id;
       this.mfaSetupSecret.value = enroll.totp?.secret || '';
       this.mfaSetupQr.src = enroll.totp?.qr_code || '';
       this.mfaSetupBtn.disabled = false;
     } catch (err) {
+      console.error('showMFASetup error:', err);
       this.mfaSetupError.textContent = t('admin.mfa.setup.error');
       this.mfaSetupError.hidden = false;
     }
@@ -202,12 +206,17 @@ export class Admin {
     try {
       const challenge = await challengeMFA(this.pendingFactor);
       await verifyMFA(this.pendingFactor, challenge.id, code);
+
       const session = await getSession();
       if (!session.authenticated) {
-        throw new Error('unauthorized');
+        // MFA was set up, but the backend still isn't seeing an AAL2 token.
+        // Ask them to complete the second step now.
+        this.showMFA();
+        return;
       }
       this.onSession(session);
     } catch (err) {
+      console.error('doVerifySetup error:', err);
       this.mfaSetupError.textContent = t('admin.mfa.error.invalid');
       this.mfaSetupError.hidden = false;
     } finally {
@@ -230,7 +239,12 @@ export class Admin {
     try {
       const factors = await getFactors();
       const totp = factors.find((f) => f.factor_type === 'totp' && f.status === 'verified');
-      if (!totp) throw new Error('no_factor');
+      if (!totp) {
+        // No completed factor found — fall back to (re)enrolling so a fresh
+        // QR code with the correct secret is shown.
+        this.showMFASetup();
+        return;
+      }
 
       const challenge = await challengeMFA(totp.id);
       await verifyMFA(totp.id, challenge.id, code);
@@ -243,6 +257,7 @@ export class Admin {
       }
       this.onSession(session);
     } catch (err) {
+      console.error('doVerifyMFA error:', err);
       this.mfaError.textContent = t('admin.mfa.error.invalid');
       this.mfaError.hidden = false;
     } finally {

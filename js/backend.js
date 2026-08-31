@@ -141,16 +141,24 @@ export async function deleteLead(id) {
 // ---- MFA (TOTP) ----
 
 export async function getMFAStatus() {
-  const data = await api('/api/mfa/status');
-  return { mfaEnabled: Boolean(data?.mfaEnabled), aal: data?.aal || 'aal1' };
+  const supabase = await ensureClient();
+  if (!supabase) throw new Error('unavailable');
+  const { data } = await supabase.auth.getSession();
+  const factors = await listFactors();
+  const hasVerifiedTOTP = factors.some((f) => f.factor_type === 'totp' && f.status === 'verified');
+  return { mfaEnabled: hasVerifiedTOTP, aal: data?.session?.aal || 'aal1' };
 }
 
-export async function getFactors() {
+export async function listFactors() {
   const supabase = await ensureClient();
   if (!supabase) throw new Error('unavailable');
   const { data, error } = await supabase.auth.mfa.listFactors();
   if (error) throw error;
   return data?.totp || [];
+}
+
+export async function getFactors() {
+  return listFactors();
 }
 
 export async function challengeMFA(factorId) {
@@ -177,6 +185,14 @@ export async function enrollMFA() {
     issuer: 'Thiago Vinícius Portfolio',
     friendlyName: 'Admin',
   });
+  if (error) throw error;
+  return data;
+}
+
+export async function unEnrollMFA(factorId) {
+  const supabase = await ensureClient();
+  if (!supabase) throw new Error('unavailable');
+  const { data, error } = await supabase.auth.mfa.unenroll({ factorId });
   if (error) throw error;
   return data;
 }
