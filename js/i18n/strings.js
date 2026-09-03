@@ -91,6 +91,9 @@ export const dictionary = {
     'carousel.prev': 'Projeto anterior',
     'carousel.next': 'Próximo projeto',
     'carousel.view': 'Ver projeto',
+    'carousel.cover': 'Clique para ver meus projetos de perto',
+    'carousel.readMore': 'Ler mais',
+    'carousel.close': 'Fechar',
 
     'contact.title': 'Existe um processo do seu negócio que poderia trabalhar melhor?',
     'contact.sub': 'Solicite uma análise gratuita. Vou avaliar o seu cenário e sugerir como a tecnologia pode ajudar — sem compromisso e sem promessas irreais.',
@@ -392,6 +395,9 @@ export const dictionary = {
     'carousel.prev': 'Previous project',
     'carousel.next': 'Next project',
     'carousel.view': 'View project',
+    'carousel.cover': 'Click to see my projects up close',
+    'carousel.readMore': 'Read more',
+    'carousel.close': 'Close',
 
     'contact.title': 'Is there a process in your business that could work better?',
     'contact.sub': 'Request a free analysis. I will assess your scenario and suggest how technology can help — no commitment and no unrealistic promises.',
@@ -693,6 +699,9 @@ export const dictionary = {
     'carousel.prev': 'Proyecto anterior',
     'carousel.next': 'Siguiente proyecto',
     'carousel.view': 'Ver proyecto',
+    'carousel.cover': 'Haz clic para ver mis proyectos de cerca',
+    'carousel.readMore': 'Leer más',
+    'carousel.close': 'Cerrar',
 
     'contact.title': '¿Hay algún proceso de tu negocio que podría funcionar mejor?',
     'contact.sub': 'Solicita un análisis gratuito. Evaluaré tu escenario y sugeriré cómo la tecnología puede ayudar: sin compromiso y sin promesas irreales.',

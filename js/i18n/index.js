@@ -82,7 +82,7 @@ function bindSwitcher() {
   document.querySelectorAll('.lang-btn').forEach((btn) => btn.classList.toggle('is-active', btn.dataset.lang === currentLang));
 }
 
-const DYNAMIC_CONTAINERS = '.carousel-track, #leadsList, #adminStats, #adminFilters, #quoteReview';
+const DYNAMIC_CONTAINERS = '.carousel-ring, #leadsList, #adminStats, #adminFilters, #quoteReview';
 
 function applyStatic() {
   document.querySelectorAll('[data-i18n]').forEach((el) => {

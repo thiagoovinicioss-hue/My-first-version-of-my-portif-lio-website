@@ -177,7 +177,13 @@
         </div>
 
         <div class="carousel" id="carousel" role="region" aria-roledescription="carrossel" aria-label="Projetos selecionados" tabindex="0">
-          <div class="carousel-track" id="carouselTrack"></div>
+          <div class="carousel-floor" id="carouselFloor" aria-hidden="true"></div>
+          <div class="carousel-camera" id="carouselCamera">
+            <div class="carousel-ring" id="carouselRing"></div>
+          </div>
+          <button type="button" class="carousel-cover" id="carouselCover" aria-hidden="false">
+            <span class="carousel-cover-label" data-i18n="carousel.cover">Clique para ver meus projetos de perto</span>
+          </button>
           <button type="button" class="carousel-nav carousel-prev" id="carouselPrev" aria-label="Projeto anterior">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18 9 12l6-6"/></svg>
           </button>
