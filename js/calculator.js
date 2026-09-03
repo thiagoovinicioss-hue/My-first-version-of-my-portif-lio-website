@@ -32,20 +32,36 @@ export function initCalculator() {
   const shell = document.querySelector('[data-calculator]');
   if (!shell) return null;
 
-  const hoursEl = shell.querySelector('#calcHours');
-  const costEl = shell.querySelector('#calcCost');
-  const peopleEl = shell.querySelector('#calcPeople');
-  const frequencyEl = shell.querySelector('#calcFrequency');
+  const hourMap = {
+    hoursPerExecution: { el: shell.querySelector('#calcHours'), defaultValue: 2 },
+    hourlyCost: { el: shell.querySelector('#calcCost'), defaultValue: 30 },
+    numberOfPeople: { el: shell.querySelector('#calcPeople'), defaultValue: 1 },
+    executionsPerMonth: { el: shell.querySelector('#calcFrequency'), defaultValue: 20 },
+  };
   const resultEl = shell.querySelector('#calcResult');
 
+  function readInputs() {
+    const input = {};
+    for (const key of Object.keys(hourMap)) {
+      input[key] = Number(hourMap[key].el.value);
+    }
+    return input;
+  }
+
+  // Some browsers clear/revalidate `type="number"` inputs when the document
+  // `lang` attribute changes, leaving `.value` empty (→ result 0). On a
+  // language switch, restore any field that no longer holds a valid number to
+  // its initial value so the result never zeroes out. User-typed values on
+  // `input` events are left untouched.
+  function restoreCleared() {
+    for (const { el, defaultValue } of Object.values(hourMap)) {
+      const num = Number(el.value);
+      if (el.value.trim() === '' || !Number.isFinite(num)) el.value = defaultValue;
+    }
+  }
+
   function render() {
-    const input = {
-      hoursPerExecution: Number(hoursEl.value),
-      hourlyCost: Number(costEl.value),
-      numberOfPeople: Number(peopleEl.value),
-      executionsPerMonth: Number(frequencyEl.value),
-    };
-    const { monthlyHours, monthlyCost } = calculateMonthlyImpact(input);
+    const { monthlyHours, monthlyCost } = calculateMonthlyImpact(readInputs());
     const lang = getLang();
 
     resultEl.innerHTML = `
@@ -54,11 +70,14 @@ export function initCalculator() {
     `;
   }
 
-  [hoursEl, costEl, peopleEl, frequencyEl].forEach((el) => {
+  Object.values(hourMap).forEach(({ el }) => {
     el.addEventListener('input', render);
   });
 
-  document.addEventListener('i18n:change', render);
+  document.addEventListener('i18n:change', () => {
+    restoreCleared();
+    render();
+  });
 
   render();
 
