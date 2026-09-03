@@ -13,6 +13,8 @@
   outline: none;
 }
 .carousel.is-dragging { cursor: grabbing; }
+.carousel.is-dragging .carousel-card,
+.carousel.is-dragging * { transition: none !important; }
 .carousel:focus-visible { outline-color: var(--accent-deep); }
 
 .carousel-track {
@@ -26,15 +28,16 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(88%, 720px);
+  width: min(100%, 460px);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 20px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 40px 70px -30px rgba(20, 18, 15, 0.45);
   overflow: hidden;
   will-change: transform, opacity;
   transition: transform 0.7s var(--ease), opacity 0.6s ease;
   transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 .card-preview {
@@ -148,7 +151,7 @@
    ============================================================ */
 @media (max-width: 700px) {
   .carousel { perspective: 1100px; margin-bottom: 40px; }
-  .carousel-card { width: 88%; border-radius: 16px; }
+  .carousel-card { width: min(76%, 340px); border-radius: 16px; }
   .card-body { padding: 18px 20px 22px; }
   .card-desc { font-size: 13.5px; }
   .carousel-nav { width: 40px; height: 40px; top: 42%; }
@@ -157,5 +160,5 @@
 }
 
 @media (max-width: 420px) {
-  .carousel-card { width: 92%; }
+  .carousel-card { width: min(80%, 300px); }
 }

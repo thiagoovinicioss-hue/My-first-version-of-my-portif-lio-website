@@ -17,6 +17,9 @@ export class Carousel {
     this.startX = 0;
     this.dragDX = 0;
     this.suppressClick = false;
+    this.lastX = 0;
+    this.lastT = 0;
+    this.velocity = 0;
 
     this.render();
     this.bind();
@@ -79,23 +82,30 @@ export class Carousel {
       if (e.key === 'End') { e.preventDefault(); this.go(PROJECTS.length - 1); }
     });
 
-    // Pointer / touch drag (vertical page scroll stays native via touch-action: pan-y).
-    // Pointer capture is only engaged after a real horizontal move — otherwise a
-    // plain tap/click on a card link would be retargeted to the carousel root and
-    // the browser would never open the project URL.
+    // Pointer / touch drag with velocity tracking for inertia-based snapping.
     this.pointerId = null;
     this.captured = false;
     this.root.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (e.target.closest('.carousel-nav')) return;
+      if (this.rafId) { cancelAnimationFrame(this.rafId); this.rafId = null; }
       this.pointerId = e.pointerId;
       this.startX = e.clientX;
+      this.lastX = e.clientX;
       this.dragDX = 0;
+      this.velocity = 0;
       this.dragging = true;
+      this.root.classList.add('is-dragging');
     });
 
     this.root.addEventListener('pointermove', (e) => {
       if (!this.dragging || e.pointerId !== this.pointerId) return;
+      const now = performance.now();
+      const dx = e.clientX - this.lastX;
+      const dt = now - this.lastT;
+      if (dt > 0) this.velocity = 0.7 * this.velocity + 0.3 * (dx / dt);
+      this.lastX = e.clientX;
+      this.lastT = now;
       this.dragDX = e.clientX - this.startX;
       if (!this.captured && Math.abs(this.dragDX) > 6) {
         this.captured = true;
@@ -113,10 +123,17 @@ export class Carousel {
       this.captured = false;
       this.pointerId = null;
       this.root.classList.remove('is-dragging');
+
       const dx = this.dragDX;
-      if (dx > 60) { this.suppressClick = true; this.go(this.index - 1); }
-      else if (dx < -60) { this.suppressClick = true; this.go(this.index + 1); }
-      this.setDrag(0);
+      const absV = Math.abs(this.velocity);
+      let next = this.index;
+      if (dx > 60 || this.velocity > 0.5) next = this.index - 1;
+      else if (dx < -60 || this.velocity < -0.5) next = this.index + 1;
+
+      if (next !== this.index) { this.suppressClick = true; this.go(next); }
+      else { this.setDrag(0); }
+
+      this.velocity = 0;
       this.dragDX = 0;
       window.setTimeout(() => { this.suppressClick = false; }, 250);
     };
@@ -127,7 +144,19 @@ export class Carousel {
       if (this.suppressClick) { e.preventDefault(); e.stopPropagation(); }
     }, true);
 
-    subscribe(() => this.render());
+    // Clicking an adjacent (visible) card moves it to the center.
+    this.root.addEventListener('click', (e) => {
+      if (this.suppressClick) return;
+      const card = e.target.closest('.carousel-card');
+      if (!card || card.classList.contains('is-active')) return;
+      const idx = this.cards.indexOf(card);
+      if (idx === -1) return;
+      e.preventDefault();
+      if (e.target.closest('a')) return;
+      this.go(idx);
+    });
+
+    subscribe(() => { if (!this.root.hidden) this.render(); });
   }
 
   setDrag(dx) {
@@ -139,61 +168,76 @@ export class Carousel {
     const len = PROJECTS.length;
     this.index = (next + len) % len;
     this.update();
+    this.root.setAttribute('aria-label', `${t('carousel.region')}: ${PROJECTS[this.index].title} (${this.index + 1} / ${len})`);
   }
 
   update() {
     const reduced = reducedMotion.matches;
     const mobile = this.root.clientWidth < 700;
-    const maxAbs = mobile ? 2 : 3;
+    const len = PROJECTS.length;
     this.cards.forEach((card, i) => {
-      let offset = i - this.index;
-      // normalize to shortest distance for smooth wrap
-      const len = PROJECTS.length;
-      if (offset > len / 2) offset -= len;
-      if (offset < -len / 2) offset += len;
+      let d = i - this.index;
+      if (d > len / 2) d -= len;
+      if (d < -len / 2) d += len;
+      const dir = Math.sign(d);
+      const abs = Math.abs(d);
 
-      const abs = Math.abs(offset);
-      let opacity, z, scale, x, y, ry, rx, zIndex = 0;
+      let x, z, ry, rx, opacity, zIndex, scale, y = 0;
 
-      if (abs === 0) {
-        opacity = 1; z = 0; scale = 1; x = '0%'; y = 0; ry = 0; rx = 0; zIndex = 30;
-      } else if (abs === 1) {
-        opacity = mobile ? 0.85 : 0.98;
-        z = reduced ? -40 : mobile ? -90 : -170;
-        scale = mobile ? 0.9 : 0.85;
-        x = `${offset * (mobile ? 20 : 46)}%`;
-        y = reduced ? -6 : mobile ? 10 : 26;
-        ry = offset * -16; rx = mobile ? 2 : 5;
-        zIndex = 20;
-      } else if (abs === 2) {
-        opacity = mobile ? 0 : 0.24;
-        z = reduced ? -80 : -360;
-        scale = 0.68;
-        x = `${offset * 68}%`;
-        y = reduced ? -12 : 56;
-        ry = offset * -24; rx = 8;
-        zIndex = 10;
+      if (reduced) {
+        // Reduced motion: keep the carousel usable and flat — no depth/rotation.
+        const X = [0, 62, 125, 188];
+        const OP = [1, 0.55, 0.28, 0.12];
+        scale = 1; z = 0; ry = 0; rx = 0; y = 6;
+        x = `${dir * X[abs]}%`;
+        opacity = abs <= 3 ? OP[abs] : 0;
+        zIndex = 30 - abs * 10;
+      } else if (mobile) {
+        // Mobile: center forward, one near card on each side, no farther cards.
+        if (abs === 0) { x = '0%'; z = 140; ry = 0; rx = 0; opacity = 1; zIndex = 30; scale = 1; y = 0; }
+        else if (abs === 1) { x = `${dir * 58}%`; z = -80; ry = dir * -30; rx = 4; opacity = 0.9; zIndex = 20; scale = 0.88; y = 16; }
+        else { opacity = 0; scale = 1; x = `${dir * 90}%`; z = -220; ry = 0; rx = 4; zIndex = 10; y = 40; }
       } else {
-        opacity = 0;
-        z = 0; scale = 0.5; x = `${offset * 80}%`; y = 80; ry = 0; rx = 0;
+        // Desktop: a curved gallery receding into depth.
+        const X = [0, 70, 134, 194];   // translateX as % of card width, signed
+        const Z = [260, 0, -320, -640]; // translateZ (px) — center is pulled toward the camera
+        const RY = [0, 32, 54, 64];     // |rotateY| (deg); sides turn toward the center
+        const RX = [0, 7, 10, 12];
+        const OP = [1, 0.95, 0.62, 0.32];
+        const ZI = [30, 20, 10, 5];
+        if (abs <= 3) {
+          x = `${dir * X[abs]}%`;
+          z = Z[abs];
+          ry = dir * -RY[abs];
+          rx = RX[abs];
+          opacity = OP[abs];
+          zIndex = ZI[abs];
+          scale = 1;
+          y = abs * 14;
+        } else { opacity = 0; scale = 1; x = `${dir * 220}%`; z = -900; ry = 0; rx = 10; zIndex = 1; y = 90; }
       }
 
       card.style.opacity = opacity;
       card.style.zIndex = zIndex;
-      card.style.transform = `translate(-50%, -50%) translateX(calc(${x} + var(--drag, 0px))) translateY(${y}px) translateZ(${z}px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${scale})`;
+      card.style.transform =
+        `translate(-50%, -50%) translateX(calc(${x} + var(--drag, 0px))) translateY(${y}px) translateZ(${z}px) rotateX(${rx}deg) rotateY(${ry}deg)`;
 
-      const hidden = abs > maxAbs || opacity === 0;
+      const hidden = abs > this.maxAbs() || opacity === 0;
       card.setAttribute('aria-hidden', hidden ? 'true' : 'false');
       card.classList.toggle('is-active', abs === 0);
       card.querySelectorAll('a').forEach((a) => { a.tabIndex = hidden ? -1 : 0; });
-      card.style.pointerEvents = (hidden || abs !== 0 && mobile) ? 'none' : '';
+      card.style.pointerEvents = (hidden || (abs !== 0 && mobile)) ? 'none' : '';
     });
 
-    this.counter.textContent = `${String(this.index + 1).padStart(2, '0')} / ${String(PROJECTS.length).padStart(2, '0')}`;
+    this.counter.textContent = `${String(this.index + 1).padStart(2, '0')} / ${String(len).padStart(2, '0')}`;
     this.root.setAttribute('aria-label', PROJECTS[this.index].title);
     if (this.liveRegion) this.liveRegion.textContent = PROJECTS[this.index].title;
 
     this.resize();
+  }
+
+  maxAbs() {
+    return reducedMotion.matches ? 3 : (this.root.clientWidth < 700 ? 1 : 3);
   }
 
   resize = () => {

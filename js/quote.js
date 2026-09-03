@@ -2,9 +2,10 @@ import { t, getOptions, subscribe } from './i18n/index.js';
 import { whatsappUrl, isBackendConfigured } from './config.js';
 import { saveLead } from './backend.js';
 import { escapeHtml } from './ui.js';
+import { recommendAddons, addonById } from './services.js';
 
 const STEPS = [
-  { id: 1, fields: ['name', 'companyType'] },
+  { id: 1, fields: ['name', 'companyType', 'contact'] },
   { id: 2, fields: ['goals', 'objective'] },
   { id: 3, fields: ['budget'] },
   { id: 4, fields: [] },
@@ -36,10 +37,12 @@ class QuoteFlow {
     this.savedNote = shell.querySelector('#quoteSavedNote');
     this.budgetOptions = [...shell.querySelectorAll('.budget-option')];
     this.hpInput = shell.querySelector('[name="hp"]');
+    this.addonGrid = shell.querySelector('#quoteAddonGrid');
+    this.addonSummary = shell.querySelector('#quoteAddonSummary');
 
     this.step = 1;
     this.budgetIndex = null;
-    this.data = { name: '', company: '', companyType: '', goals: '', objective: '', details: '', budget: '', extra: '' };
+    this.data = { name: '', company: '', companyType: '', contact: '', goals: '', objective: '', details: '', budget: '', extra: '', selectedAddOns: [] };
     this.submitting = false;
 
     this.populateSelects();
@@ -48,6 +51,7 @@ class QuoteFlow {
       this.populateSelects();
       this.renderBudget();
       this.renderReview();
+      this.renderAddOns();
       this.syncStep();
     });
   }
@@ -99,7 +103,7 @@ class QuoteFlow {
     const form = this.form;
     form.addEventListener('submit', (e) => e.preventDefault());
 
-    ['name', 'company', 'companyType', 'goals', 'objective', 'details', 'extra'].forEach((name) => {
+    ['name', 'company', 'companyType', 'contact', 'goals', 'objective', 'details', 'extra'].forEach((name) => {
       const el = form.querySelector(`[name="${name}"]`);
       if (!el) return;
       el.addEventListener('input', () => { if (name !== 'details' && name !== 'extra' && this.step === 4) this.renderReview(); });
@@ -112,11 +116,21 @@ class QuoteFlow {
     this.data.name = this.form.querySelector('[name="name"]').value.trim();
     this.data.company = this.form.querySelector('[name="company"]').value.trim();
     this.data.companyType = this.form.querySelector('[name="companyType"]').selectedOptions[0].textContent;
+    this.data.contact = this.form.querySelector('[name="contact"]').value.trim();
     this.data.goals = this.form.querySelector('[name="goals"]').selectedOptions[0].textContent;
     this.data.objective = this.form.querySelector('[name="objective"]').selectedOptions[0].textContent;
     this.data.details = this.form.querySelector('[name="details"]').value.trim();
     this.data.budget = this.budgetIndex !== null ? t(`quote.budget.o${this.budgetIndex + 1}`) : '';
     this.data.extra = this.form.querySelector('[name="extra"]').value.trim();
+  }
+
+  // The placeholder option always has value="" — an explicit empty value — so a
+  // select is only filled when a real (non-placeholder) option is chosen. We
+  // validate against the raw option VALUE (not the display text), which prevents
+  // placeholders such as "Selecione…" from ever counting as a valid answer.
+  selectedValue(name) {
+    const el = this.form.querySelector(`[name="${name}"]`);
+    return el ? el.value : '';
   }
 
   validateStep(step) {
@@ -138,16 +152,17 @@ class QuoteFlow {
       if (fieldEl) fieldEl.removeAttribute('aria-invalid');
     };
 
-    ['name', 'companyType', 'goals', 'objective', 'details', 'extra'].forEach(clearError);
+    ['name', 'companyType', 'contact', 'goals', 'objective', 'details', 'extra'].forEach(clearError);
     this.formError.hidden = true;
     const elBudgetError = this.form.querySelector('[data-error-for="budget"]');
 
     if (step === 1) {
       if (!this.data.name) setError('name');
-      if (!this.data.companyType) setError('companyType');
+      if (!this.selectedValue('companyType')) setError('companyType');
+      if (!this.data.contact) setError('contact');
     } else if (step === 2) {
-      if (!this.data.goals) setError('goals');
-      if (!this.data.objective) setError('objective');
+      if (!this.selectedValue('goals')) setError('goals');
+      if (!this.selectedValue('objective')) setError('objective');
     } else if (step === 3) {
       if (this.budgetIndex === null) {
         ok = false;
@@ -165,7 +180,7 @@ class QuoteFlow {
       if (!this.validateStep(this.step)) return;
     }
     this.step = Math.min(Math.max(next, 1), 4);
-    if (this.step === 4) this.renderReview();
+    if (this.step === 4) { this.renderReview(); this.renderAddOns(); }
     this.syncStep();
   }
 
@@ -183,6 +198,7 @@ class QuoteFlow {
       ['name', this.data.name],
       ['company', this.data.company || t('quote.review.none')],
       ['ctype', this.data.companyType || t('quote.review.none')],
+      ['contact', this.data.contact || t('quote.review.none')],
       ['goals', this.data.goals || t('quote.review.none')],
       ['objective', this.data.objective || t('quote.review.none')],
       ['details', this.data.details || t('quote.review.none')],
@@ -190,7 +206,7 @@ class QuoteFlow {
       ['extra', this.data.extra || t('quote.review.none')],
     ];
     this.reviewEl.innerHTML = '';
-    const rowMap = { name: 1, company: 1, ctype: 1, goals: 2, objective: 2, details: 2, budget: 3, extra: 3 };
+    const rowMap = { name: 1, company: 1, ctype: 1, contact: 1, goals: 2, objective: 2, details: 2, budget: 3, extra: 3 };
     rows.forEach(([key, value]) => {
       const div = document.createElement('div');
       div.className = 'quote-review-row';
@@ -199,6 +215,53 @@ class QuoteFlow {
       div.addEventListener('click', () => this.go(rowMap[key]));
       this.reviewEl.appendChild(div);
     });
+  }
+
+  renderAddOns() {
+    if (!this.addonGrid) return;
+    const recs = recommendAddons({
+      primaryGoal: this.selectedValue('goals'),
+      objectiveValue: this.selectedValue('objective'),
+    });
+    const selected = new Set(this.data.selectedAddOns);
+
+    this.addonGrid.innerHTML = recs.map(({ id, recommended }) => {
+      const addon = addonById(id);
+      if (!addon) return '';
+      const checked = selected.has(id);
+      return `
+        <button type="button" class="addon-card${checked ? ' is-selected' : ''}" role="checkbox" aria-checked="${checked ? 'true' : 'false'}" data-addon="${id}">
+          ${recommended ? `<span class="addon-badge">${escapeHtml(t('addon.recommended'))}</span>` : ''}
+          <span class="addon-check" aria-hidden="true"></span>
+          <span class="addon-name">${escapeHtml(t(`addons.${id}.title`))}</span>
+          <span class="addon-benefit">${escapeHtml(t(`addons.${id}.benefit`))}</span>
+        </button>
+      `;
+    }).join('');
+
+    this.addonGrid.querySelectorAll('.addon-card').forEach((card) => {
+      card.addEventListener('click', () => this.toggleAddOn(card.dataset.addon));
+    });
+
+    this.renderAddOnSummary();
+  }
+
+  toggleAddOn(id) {
+    const idx = this.data.selectedAddOns.indexOf(id);
+    if (idx === -1) this.data.selectedAddOns.push(id);
+    else this.data.selectedAddOns.splice(idx, 1);
+    this.renderAddOns();
+  }
+
+  renderAddOnSummary() {
+    if (!this.addonSummary) return;
+    if (!this.data.selectedAddOns.length) {
+      this.addonSummary.textContent = t('addon.none');
+      return;
+    }
+    this.addonSummary.textContent = this.data.selectedAddOns
+      .map((id) => t(`addons.${id}.title`))
+      .join(' · ');
   }
 
   syncStep() {
@@ -255,11 +318,13 @@ class QuoteFlow {
       name: this.data.name,
       company_name: this.data.company || null,
       company_type: this.data.companyType,
+      contact: this.data.contact,
       goals: this.data.goals,
       objective: this.data.objective,
       budget: this.data.budget,
       details: this.data.details || null,
       additional_info: this.data.extra || null,
+      selected_addons: this.data.selectedAddOns,
     };
 
     let saved = false;
@@ -295,8 +360,15 @@ class QuoteFlow {
       `• ${t('wa.what')}: ${this.data.goals}`,
       `• ${t('wa.objective')}: ${this.data.objective}`,
       `• ${t('wa.budget')}: ${this.data.budget}`,
+      `• ${t('wa.contact')}: ${this.data.contact}`,
     ];
     if (this.data.extra) lines.push(`• ${t('wa.extra')}: ${this.data.extra}`);
+    const addons = (this.data.selectedAddOns || [])
+      .map((id) => `- ${t(`addons.${id}.title`)}`)
+      .filter(Boolean);
+    if (addons.length) {
+      lines.push('', t('wa.addons') + ':', ...addons);
+    }
     return lines.join('\n');
   }
 

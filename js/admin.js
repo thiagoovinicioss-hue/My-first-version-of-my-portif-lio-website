@@ -67,7 +67,7 @@ export class Admin {
       this.setSection(this.login);
       this.loginError.hidden = true;
     });
-    this.mfaSetupForm = root.querySelector('#mfaSetupForm');
+    this.mfaSetupForm = this.root.querySelector('#mfaSetupForm');
     this.mfaSetupForm.addEventListener('submit', (e) => {
       e.preventDefault();
       this.doVerifySetup();
@@ -369,6 +369,11 @@ export class Admin {
       ? `<div class="lead-detail"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`
       : '';
 
+    const addonsValue = (lead.selected_addons || [])
+      .map((id) => t(`addons.${id}.title`))
+      .filter(Boolean)
+      .join(', ');
+
     return `
       <article class="lead-card ${lead.status === 'new' ? 'is-new' : ''}">
         <div class="lead-head">
@@ -386,10 +391,12 @@ export class Admin {
         <dl class="lead-details">
           ${detail(t('admin.lead.company'), lead.company_name)}
           ${detail(t('admin.lead.ctype'), lead.company_type)}
+          ${detail(t('admin.lead.contact'), lead.contact)}
           ${detail(t('admin.lead.goals'), lead.goals)}
           ${detail(t('admin.lead.objective'), lead.objective)}
           ${detail(t('admin.lead.budget'), lead.budget)}
           ${detail(t('admin.lead.extra'), lead.additional_info || lead.details)}
+          ${detail(t('admin.lead.addons'), addonsValue)}
         </dl>
         <div class="lead-actions">
           <button type="button" class="btn-ghost-mini" data-delete="${escapeHtml(lead.id)}">${escapeHtml(t('admin.lead.delete'))}</button>

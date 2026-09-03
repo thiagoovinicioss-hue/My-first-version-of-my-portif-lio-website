@@ -29,11 +29,13 @@ export async function saveLead(payload) {
       name: String(payload.name || '').slice(0, 120),
       company_name: String(payload.company_name || '').slice(0, 160),
       company_type: String(payload.company_type || '').slice(0, 100),
+      contact: String(payload.contact || '').slice(0, 160),
       goals: String(payload.goals || '').slice(0, 100),
       objective: String(payload.objective || '').slice(0, 100),
       budget: String(payload.budget || '').slice(0, 80),
       details: String(payload.details || '').slice(0, 2000),
       additional_info: String(payload.additional_info || '').slice(0, 2000),
+      selected_addons: Array.isArray(payload.selected_addons) ? payload.selected_addons.slice(0, 8) : [],
     })
     .select('id')
     .single();

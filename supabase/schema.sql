@@ -27,11 +27,13 @@ create table if not exists public.leads (
   name text not null,
   company_name text,
   company_type text,
+  contact text,
   goals text,
   objective text,
   budget text,
   details text,
   additional_info text,
+  selected_addons text[] not null default '{}',
   status text not null default 'new',
   created_at timestamptz not null default now()
 );

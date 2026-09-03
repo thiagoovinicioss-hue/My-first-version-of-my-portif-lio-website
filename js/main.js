@@ -4,6 +4,7 @@ import { initTheme } from './theme.js';
 import { initCarousel } from './carousel.js';
 import { initQuote } from './quote.js';
 import { initAdmin } from './admin.js';
+import { initCalculator } from './calculator.js';
 
 const views = {};
 let homeScrollY = 0;
@@ -92,20 +93,31 @@ function closeMenu() {
 
 // ----- Reveal on scroll -----
 let revealObserver = null;
+let revealArmed = false;
+function revealAll() {
+  document.querySelectorAll('.reveal').forEach((el) => el.classList.add('revealed'));
+}
 function initReveal() {
-  if (!('IntersectionObserver' in window)) {
-    document.querySelectorAll('.reveal').forEach((el) => el.classList.add('revealed'));
+  if (!revealObserver && !('IntersectionObserver' in window)) {
+    revealAll();
     return;
   }
   if (!revealObserver) {
-    revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('revealed');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    try {
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      revealArmed = true;
+    } catch (_) {
+      // IntersectionObserver unavailable or failed to construct — show content.
+      revealAll();
+      return;
+    }
   }
   document.querySelectorAll('.reveal:not(.revealed)').forEach((el) => revealObserver.observe(el));
 }
@@ -121,7 +133,7 @@ function initNavSpy() {
       });
     });
   }, { rootMargin: '-40% 0px -55% 0px' });
-  ['inicio', 'sobre', 'projetos', 'contato'].forEach((id) => {
+  ['inicio', 'sobre', 'dores', 'projetos', 'servicos', 'resultados', 'calculadora', 'contato'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) navSpyObserver.observe(el);
   });
@@ -156,9 +168,18 @@ function boot() {
   initHeader();
   initRouter();
 
-  const carousel = initCarousel();
-  quote = initQuote();
-  admin = initAdmin();
+  // Feature modules are discretionary enhancements. If one fails to
+  // initialize, log it but never let it blank the page or block the
+  // reveal/calculator startup below.
+  try {
+    initCarousel();
+    quote = initQuote();
+    admin = initAdmin();
+    initCalculator();
+    window.__admin = admin;
+  } catch (err) {
+    console.error('[init] module failed to initialize:', err);
+  }
 
   // Language buttons use i18n.setLang
   document.querySelectorAll('.lang-btn').forEach((btn) => {
@@ -177,6 +198,12 @@ function boot() {
   initReveal();
   initNavSpy();
   window.addEventListener('load', initReveal);
+  // Fail-safe: if reveal could not be armed by load+3s (a module threw
+  // before initReveal, or the observer could not be constructed), show
+  // every section anyway so the page is never blank.
+  window.setTimeout(() => {
+    if (!revealArmed && document.querySelector('.reveal:not(.revealed)')) revealAll();
+  }, 3000);
 }
 
 // Ensure no full-reflow FOUC for languages other than default
