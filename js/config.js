@@ -18,7 +18,6 @@ export const CONFIG = {
     linkedin: 'https://www.linkedin.com/in/thiago-vinicius-b-araujo-vinicius-81108b341',
     instagram: 'https://www.instagram.com/thiagovinnicius14/',
     whatsapp: '#', // filled below from whatsapp.number
-    youtube: 'https://www.youtube.com/@Thiago_maker',
     github: 'https://github.com/thiagoovinicioss-hue',
   },
 

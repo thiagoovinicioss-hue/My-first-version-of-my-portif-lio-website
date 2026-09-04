@@ -141,7 +141,7 @@ function initNavSpy() {
 
 // ----- Social links from config -----
 function wireSocial() {
-  const map = { linkedin: '#socialLinkedin', instagram: '#socialInstagram', youtube: '#socialYoutube', github: '#socialGithub' };
+  const map = { linkedin: '#socialLinkedin', instagram: '#socialInstagram', github: '#socialGithub' };
   Object.entries(map).forEach(([key, sel]) => {
     const el = document.querySelector(sel);
     if (el) el.href = CONFIG.social[key];

@@ -119,7 +119,7 @@ The anon/publishable key and the API URL are public by design. Leave
 | Setting | What to do |
 |---|---|
 | `whatsapp.number` | Your real WhatsApp number (digits only). |
-| `social.*` | LinkedIn / Instagram / YouTube / GitHub links. |
+| `social.*` | LinkedIn / Instagram / GitHub links. |
 | `profileImage` | Path to `assets/profile.webp`. |
 | `supabase.url` / `supabase.anonKey` | Enables lead storage & the quote flow saving to Supabase. |
 

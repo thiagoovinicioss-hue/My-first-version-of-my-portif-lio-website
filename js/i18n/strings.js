@@ -105,7 +105,6 @@ export const dictionary = {
     'social.linkedin': 'LinkedIn',
     'social.instagram': 'Instagram',
     'social.whatsapp': 'WhatsApp',
-    'social.youtube': 'YouTube',
     'social.github': 'GitHub',
 
     'loading.text': 'Carregando…',
@@ -409,7 +408,6 @@ export const dictionary = {
     'social.linkedin': 'LinkedIn',
     'social.instagram': 'Instagram',
     'social.whatsapp': 'WhatsApp',
-    'social.youtube': 'YouTube',
     'social.github': 'GitHub',
 
     'loading.text': 'Loading…',
@@ -713,7 +711,6 @@ export const dictionary = {
     'social.linkedin': 'LinkedIn',
     'social.instagram': 'Instagram',
     'social.whatsapp': 'WhatsApp',
-    'social.youtube': 'YouTube',
     'social.github': 'GitHub',
 
     'loading.text': 'Cargando…',
