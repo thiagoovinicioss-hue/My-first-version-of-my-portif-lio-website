@@ -6,7 +6,7 @@ import { recommendAddons, addonById } from './services.js';
 
 const STEPS = [
   { id: 1, fields: ['name', 'companyType', 'contact'] },
-  { id: 2, fields: ['goals', 'objective'] },
+  { id: 2, fields: ['goals', 'objective', 'howItWorksToday', 'biggestPain', 'weeklyTimeSpent', 'previousAttempts'] },
   { id: 3, fields: ['budget'] },
   { id: 4, fields: [] },
 ];
@@ -42,7 +42,7 @@ class QuoteFlow {
 
     this.step = 1;
     this.budgetIndex = null;
-    this.data = { name: '', company: '', companyType: '', contact: '', goals: '', objective: '', details: '', budget: '', extra: '', selectedAddOns: [] };
+    this.data = { name: '', company: '', companyType: '', contact: '', goals: '', objective: '', howItWorksToday: '', biggestPain: '', weeklyTimeSpent: '', previousAttempts: '', budget: '', extra: '', selectedAddOns: [] };
     this.submitting = false;
 
     this.populateSelects();
@@ -103,10 +103,10 @@ class QuoteFlow {
     const form = this.form;
     form.addEventListener('submit', (e) => e.preventDefault());
 
-    ['name', 'company', 'companyType', 'contact', 'goals', 'objective', 'details', 'extra'].forEach((name) => {
+    ['name', 'company', 'companyType', 'contact', 'goals', 'objective', 'howItWorksToday', 'biggestPain', 'weeklyTimeSpent', 'previousAttempts', 'extra'].forEach((name) => {
       const el = form.querySelector(`[name="${name}"]`);
       if (!el) return;
-      el.addEventListener('input', () => { if (name !== 'details' && name !== 'extra' && this.step === 4) this.renderReview(); });
+      el.addEventListener('input', () => { if (name !== 'extra' && this.step === 4) this.renderReview(); });
     });
 
     this.submitBtn.addEventListener('click', () => this.submit());
@@ -119,7 +119,10 @@ class QuoteFlow {
     this.data.contact = this.form.querySelector('[name="contact"]').value.trim();
     this.data.goals = this.form.querySelector('[name="goals"]').selectedOptions[0].textContent;
     this.data.objective = this.form.querySelector('[name="objective"]').selectedOptions[0].textContent;
-    this.data.details = this.form.querySelector('[name="details"]').value.trim();
+    this.data.howItWorksToday = this.form.querySelector('[name="howItWorksToday"]').value.trim();
+    this.data.biggestPain = this.form.querySelector('[name="biggestPain"]').value.trim();
+    this.data.weeklyTimeSpent = this.form.querySelector('[name="weeklyTimeSpent"]').value.trim();
+    this.data.previousAttempts = this.form.querySelector('[name="previousAttempts"]').value.trim();
     this.data.budget = this.budgetIndex !== null ? t(`quote.budget.o${this.budgetIndex + 1}`) : '';
     this.data.extra = this.form.querySelector('[name="extra"]').value.trim();
   }
@@ -152,7 +155,7 @@ class QuoteFlow {
       if (fieldEl) fieldEl.removeAttribute('aria-invalid');
     };
 
-    ['name', 'companyType', 'contact', 'goals', 'objective', 'details', 'extra'].forEach(clearError);
+    ['name', 'companyType', 'contact', 'goals', 'objective', 'howItWorksToday', 'biggestPain', 'weeklyTimeSpent', 'previousAttempts', 'extra'].forEach(clearError);
     this.formError.hidden = true;
     const elBudgetError = this.form.querySelector('[data-error-for="budget"]');
 
@@ -163,6 +166,10 @@ class QuoteFlow {
     } else if (step === 2) {
       if (!this.selectedValue('goals')) setError('goals');
       if (!this.selectedValue('objective')) setError('objective');
+      if (!this.data.howItWorksToday) setError('howItWorksToday');
+      if (!this.data.biggestPain) setError('biggestPain');
+      if (!this.data.weeklyTimeSpent) setError('weeklyTimeSpent');
+      if (!this.data.previousAttempts) setError('previousAttempts');
     } else if (step === 3) {
       if (this.budgetIndex === null) {
         ok = false;
@@ -201,12 +208,15 @@ class QuoteFlow {
       ['contact', this.data.contact || t('quote.review.none')],
       ['goals', this.data.goals || t('quote.review.none')],
       ['objective', this.data.objective || t('quote.review.none')],
-      ['details', this.data.details || t('quote.review.none')],
+      ['howItWorksToday', this.data.howItWorksToday || t('quote.review.none')],
+      ['biggestPain', this.data.biggestPain || t('quote.review.none')],
+      ['weeklyTimeSpent', this.data.weeklyTimeSpent || t('quote.review.none')],
+      ['previousAttempts', this.data.previousAttempts || t('quote.review.none')],
       ['budget', this.data.budget || t('quote.review.none')],
       ['extra', this.data.extra || t('quote.review.none')],
     ];
     this.reviewEl.innerHTML = '';
-    const rowMap = { name: 1, company: 1, ctype: 1, contact: 1, goals: 2, objective: 2, details: 2, budget: 3, extra: 3 };
+    const rowMap = { name: 1, company: 1, ctype: 1, contact: 1, goals: 2, objective: 2, howItWorksToday: 2, biggestPain: 2, weeklyTimeSpent: 2, previousAttempts: 2, budget: 3, extra: 3 };
     rows.forEach(([key, value]) => {
       const div = document.createElement('div');
       div.className = 'quote-review-row';
@@ -321,8 +331,11 @@ class QuoteFlow {
       contact: this.data.contact,
       goals: this.data.goals,
       objective: this.data.objective,
+      how_it_works_today: this.data.howItWorksToday || null,
+      biggest_pain: this.data.biggestPain || null,
+      weekly_time_spent: this.data.weeklyTimeSpent || null,
+      previous_attempts: this.data.previousAttempts || null,
       budget: this.data.budget,
-      details: this.data.details || null,
       additional_info: this.data.extra || null,
       selected_addons: this.data.selectedAddOns,
     };

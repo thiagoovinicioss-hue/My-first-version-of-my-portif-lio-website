@@ -394,8 +394,12 @@ export class Admin {
           ${detail(t('admin.lead.contact'), lead.contact)}
           ${detail(t('admin.lead.goals'), lead.goals)}
           ${detail(t('admin.lead.objective'), lead.objective)}
+          ${detail(t('admin.lead.howItWorksToday'), lead.how_it_works_today)}
+          ${detail(t('admin.lead.biggestPain'), lead.biggest_pain)}
+          ${detail(t('admin.lead.weeklyTimeSpent'), lead.weekly_time_spent)}
+          ${detail(t('admin.lead.previousAttempts'), lead.previous_attempts)}
           ${detail(t('admin.lead.budget'), lead.budget)}
-          ${detail(t('admin.lead.extra'), lead.additional_info || lead.details)}
+          ${detail(t('admin.lead.extra'), lead.additional_info)}
           ${detail(t('admin.lead.addons'), addonsValue)}
         </dl>
         <div class="lead-actions">

@@ -242,6 +242,16 @@
   font-size: 13px;
   color: var(--ink-faint);
 }
+.quote-success-delivery {
+  margin: 14px auto 0;
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  text-align: left;
+}
 
 /* --- Honeypot (hidden from users, bots see it) --- */
 .honeypot {

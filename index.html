@@ -380,8 +380,8 @@
           </div>
 
           <div class="quote-step-panel" data-panel="2" hidden>
-            <h2 class="quote-title" data-i18n="quote.title2">O que você precisa construir?</h2>
-            <p class="quote-desc" data-i18n="quote.desc2">Quanto mais contexto, melhor será a proposta.</p>
+            <h2 class="quote-title" data-i18n="quote.title2">Me entenda melhor</h2>
+            <p class="quote-desc" data-i18n="quote.desc2">Essas perguntas me ajudam a entender exatamente onde focar. Responda com o máximo de detalhes possível.</p>
 
             <div class="field">
               <label for="qGoals" data-i18n="quote.goals.label">O que você quer construir?</label>
@@ -404,9 +404,27 @@
             </div>
 
             <div class="field">
-              <label for="qDetails" data-i18n="quote.details.label">Conte um pouco mais sobre o projeto <span class="opt">(opcional)</span></label>
-              <textarea id="qDetails" name="details" rows="4" data-i18n-ph="quote.details.ph" placeholder="Ex.: preciso de uma landing page para captar leads, com integração com WhatsApp…"></textarea>
-              <p class="field-error" data-error-for="details" role="alert"></p>
+              <label for="qHowItWorksToday" data-i18n="quote.howItWorksToday.label">Como funciona seu processo hoje?</label>
+              <textarea id="qHowItWorksToday" name="howItWorksToday" rows="3" required data-i18n-ph="quote.howItWorksToday.ph" placeholder="Descreva passo a passo como esse processo acontece atualmente…"></textarea>
+              <p class="field-error" data-error-for="howItWorksToday" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qBiggestPain" data-i18n="quote.biggestPain.label">O que dá mais trabalho hoje no seu dia a dia?</label>
+              <textarea id="qBiggestPain" name="biggestPain" rows="3" required data-i18n-ph="quote.biggestPain.ph" placeholder="Qual é o problema que mais te frustra ou que mais te custa tempo/dinheiro?"></textarea>
+              <p class="field-error" data-error-for="biggestPain" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qWeeklyTimeSpent" data-i18n="quote.weeklyTimeSpent.label">Quanto tempo isso toma da sua semana?</label>
+              <textarea id="qWeeklyTimeSpent" name="weeklyTimeSpent" rows="2" required data-i18n-ph="quote.weeklyTimeSpent.ph" placeholder="Ex.: umas 10 horas por semana, mais ou menos…"></textarea>
+              <p class="field-error" data-error-for="weeklyTimeSpent" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="qPreviousAttempts" data-i18n="quote.previousAttempts.label">Já tentou resolver isso de alguma forma?</label>
+              <textarea id="qPreviousAttempts" name="previousAttempts" rows="3" required data-i18n-ph="quote.previousAttempts.ph" placeholder="Já usou alguma ferramenta? Contratou alguém? Investiu dinheiro nisso? Como foi?"></textarea>
+              <p class="field-error" data-error-for="previousAttempts" role="alert"></p>
             </div>
           </div>
 
@@ -472,6 +490,7 @@
           </div>
           <h2 class="quote-title" data-i18n="quote.success.title">Solicitação recebida.</h2>
           <p class="quote-desc" data-i18n="quote.success.body">Obrigado! Suas respostas foram registradas. Para fecharmos isso direto no WhatsApp, toque no botão abaixo.</p>
+          <p class="quote-success-delivery" data-i18n="quote.success.delivery">Após fecharmos o negócio, seu sistema fica pronto em 2 a 3 semanas. Priorizamos sempre resolver sua maior dor no menor prazo possível.</p>
           <div class="quote-success-actions">
             <a id="quoteWaLink" class="btn btn-primary btn-lg" href="#" target="_blank" rel="noopener">
               <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.1 3.2 5.1 4.49.71.3 1.27.49 1.7.62.72.23 1.37.2 1.88.12.58-.09 1.76-.72 2-1.42.25-.7.25-1.29.18-1.42-.07-.12-.27-.2-.57-.35ZM12.05 21.79h-.03a9.8 9.8 0 0 1-5-1.37l-.36-.21-3.72.97.99-3.62-.23-.37a9.77 9.77 0 0 1-1.5-5.22 9.78 9.78 0 0 1 19.55.26 9.78 9.78 0 0 1-9.7 9.52Z"/></svg>

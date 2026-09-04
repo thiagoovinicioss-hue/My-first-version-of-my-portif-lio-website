@@ -32,8 +32,11 @@ export async function saveLead(payload) {
       contact: String(payload.contact || '').slice(0, 160),
       goals: String(payload.goals || '').slice(0, 100),
       objective: String(payload.objective || '').slice(0, 100),
+      how_it_works_today: String(payload.how_it_works_today || '').slice(0, 2000),
+      biggest_pain: String(payload.biggest_pain || '').slice(0, 2000),
+      weekly_time_spent: String(payload.weekly_time_spent || '').slice(0, 500),
+      previous_attempts: String(payload.previous_attempts || '').slice(0, 2000),
       budget: String(payload.budget || '').slice(0, 80),
-      details: String(payload.details || '').slice(0, 2000),
       additional_info: String(payload.additional_info || '').slice(0, 2000),
       selected_addons: Array.isArray(payload.selected_addons) ? payload.selected_addons.slice(0, 8) : [],
     })
