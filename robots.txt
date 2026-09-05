@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://thiagoovinicioss-hue.github.io/My-first-version-of-my-portif-lio-website/sitemap.xml
+Sitemap: https://thiagoovinicioss-hue.github.io/portifolio/sitemap.xml

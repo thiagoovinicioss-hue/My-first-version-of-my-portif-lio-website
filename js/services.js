@@ -8,13 +8,9 @@
 
 export const ADDONS = [
   { id: 'landing_page' },
-  { id: 'whatsapp_ai' },
-  { id: 'automation' },
-  { id: 'lead_capture' },
-  { id: 'follow_up' },
-  { id: 'analytics' },
-  { id: 'dashboard' },
-  { id: 'integration' },
+  { id: 'conversion' },
+  { id: 'support_automation' },
+  { id: 'lead_organization' },
 ];
 
 export function addonById(id) {
@@ -23,25 +19,22 @@ export function addonById(id) {
 
 // Recommended add-on ids per primary service ("goals" select value).
 const BY_GOAL = {
-  landing: ['whatsapp_ai', 'lead_capture', 'follow_up', 'analytics'],
-  institutional: ['analytics', 'lead_capture', 'whatsapp_ai'],
-  ecommerce: ['analytics', 'lead_capture', 'follow_up', 'whatsapp_ai'],
-  ai: ['landing_page', 'lead_capture', 'dashboard', 'follow_up'],
-  automation: ['whatsapp_ai', 'dashboard', 'integration', 'landing_page'],
+  landing: ['conversion', 'support_automation', 'lead_organization'],
+  conversion: ['landing_page', 'support_automation', 'lead_organization'],
+  support_automation: ['landing_page', 'conversion', 'lead_organization'],
+  lead_organization: ['landing_page', 'conversion', 'support_automation'],
 };
 
-// For custom development and any other primary service, derive recommendations
-// from the main objective the visitor reported.
+// For any other primary service, derive recommendations from the main objective
+// the visitor reported.
 const BY_OBJECTIVE = {
-  leads: ['lead_capture', 'follow_up', 'whatsapp_ai', 'analytics'],
-  sales: ['analytics', 'lead_capture', 'follow_up', 'whatsapp_ai'],
-  brand: ['analytics', 'lead_capture', 'landing_page'],
-  automation: ['dashboard', 'integration', 'whatsapp_ai'],
-  productivity: ['dashboard', 'integration', 'automation'],
-  launch: ['landing_page', 'analytics', 'follow_up', 'lead_capture'],
+  leads: ['conversion', 'landing_page', 'support_automation', 'lead_organization'],
+  sales: ['landing_page', 'conversion', 'support_automation', 'lead_organization'],
+  support: ['support_automation', 'landing_page', 'conversion', 'lead_organization'],
+  organization: ['lead_organization', 'landing_page', 'conversion', 'support_automation'],
 };
 
-const DEFAULT_RECS = ['integration', 'dashboard', 'analytics', 'whatsapp_ai'];
+const DEFAULT_RECS = ['landing_page', 'conversion', 'support_automation', 'lead_organization'];
 
 // Returns 2-4 relevant complementary services for the selected primary service.
 // The first suggestion is flagged as "recommended" (badge only — never pre-selected).

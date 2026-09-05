@@ -189,9 +189,9 @@ No code changes required for these:
 
 Push to `main` with Pages enabled (Settings → Pages → source `main`, root).
 
-- Site: `https://thiagoovinicioss-hue.github.io/My-first-version-of-my-portif-lio-website/`
-- Quote: `/My-first-version-of-my-portif-lio-website/#/orcamento`
-- Admin: `/My-first-version-of-my-portif-lio-website/#/admin`
+- Site: `https://thiagoovinicioss-hue.github.io/portifolio/`
+- Quote: `/portifolio/#/orcamento`
+- Admin: `/portifolio/#/admin`
 
 Set `CONFIG.auth.apiBaseUrl` to the deployed backend URL and use the GitHub Pages
 origin in `FRONTEND_ORIGINS`.
